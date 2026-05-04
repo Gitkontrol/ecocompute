@@ -24,10 +24,11 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${location.origin}/auth/confirm`,
+        emailRedirectTo: `${window.location.origin}/signup/success?email=${encodeURIComponent(email)}`,
       },
     })
 
+    
     // 1️⃣ Handle Supabase errors cleanly
     if (error) {
       if (error.message.toLowerCase().includes('already registered')) {
@@ -53,7 +54,7 @@ export default function SignupPage() {
   } catch (err) {
     // 4️⃣ Network / fetch errors
     console.error(err)
-    setMessage('Network error. Please try again.')
+    setMessage('Oops! Something went wrong. Please try again.')
 
     // Safety cleanup
     await supabase.auth.signOut()
@@ -63,22 +64,22 @@ export default function SignupPage() {
 }
 
 
-  const handleMagicLink = async () => {
-    setLoading(true)
-    setMessage('')
+  // const handleMagicLink = async () => {
+  //   setLoading(true)
+  //   setMessage('')
 
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: {
-        emailRedirectTo: `${location.origin}/auth/confirm`
-      }
-    })
+  //   const { error } = await supabase.auth.signInWithOtp({
+  //     email,
+  //     options: {
+  //       emailRedirectTo: `${location.origin}/auth/confirm`
+  //     }
+  //   })
 
-    if (error) setMessage(error.message)
-    else setMessage('Magic link sent. Check your email.')
+  //   if (error) setMessage(error.message)
+  //   else setMessage('Magic link sent. Check your email.')
 
-    setLoading(false)
-  }
+  //   setLoading(false)
+  // }
 
   return (
     <Box

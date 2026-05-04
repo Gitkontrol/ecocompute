@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRequireAuth } from '../hooks/requireAuth';
@@ -11,9 +11,39 @@ const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 import cloudStorageAnimation from '../../../public/animations/Cloud Computing.json';
 import dataAnalyticsAnimation from '../../../public/animations/Analytics Character Animation.json';
 import securityAnimation from '../../../public/animations/Security Lock - Privacy.json';
+import { supabase } from '@/lib/supabaseClient';
+import AuthModal from '@/components/auth/signInModal';
+import VerifyEmailModal from '@/components/auth/verifyEmailModal';
 
-const handleSubscribe = async (priceId, toolName) => {
-  try {
+
+export default function ProTools() {
+const [user, setUser] = useState(null);
+const [authModalOpen, setAuthModalOpen] = useState(false);
+const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+const [isLoading, setIsLoading] = useState(false);
+const [pendingCheckout, setPendingCheckout] = useState(false);
+
+useEffect(() =>{
+  const getUser = async ()=>{
+    const { data } = await supabase.auth.getUser();
+    setUser(data.user);
+  };
+
+  getUser();
+
+  const{ data: { subscription }} = supabase.auth.onAuthStateChange((_event, session) => {
+    setUser(session?.user || null);
+  });
+
+  return () => subscription.unsubscribe();
+}, [])
+
+const startCheckout = async (priceId,toolName) => {
+  if (isLoading) return;
+
+  setIsLoading(true);
+
+   try {
     const res = await fetch('/api/stripe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -26,14 +56,30 @@ const handleSubscribe = async (priceId, toolName) => {
       window.location.href = data.url; // Redirect to Stripe Checkout
     } else {
       console.error('No URL returned from Stripe');
+      setIsLoading(false);
     }
   } catch (error) {
     console.error('Subscription error:', error);
+    setIsLoading(false);
   }
+ };
+
+ const handleCheckout = async (priceId, toolName) => {
+  setPendingCheckout({priceId, toolName})
+
+  if(!user) {
+    setAuthModalOpen(true);
+    return;
+  }
+
+  if(!user.email_confirmed_at) {
+    setVerifyModalOpen(true);
+    return;
+  }
+
+  startCheckout(priceId, toolName);
 };
 
-
-export default function ProTools() {
   const [expandedSection, setExpandedSection] = useState(null);
   const { requireAuth } = useRequireAuth();
 
@@ -85,7 +131,7 @@ export default function ProTools() {
       ]
     }
   ];
-
+  const paymentsEnabled = false;
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Header */}
@@ -130,7 +176,7 @@ export default function ProTools() {
                   <span className="text-2xl font-bold text-green-600 dark:text-green-400">
                     {tool.monthlyPrice}/mo
                   </span>
-                  <div className={`transform transition-transform ${expandedSection === index ? 'rotate-180' : ''}`}>
+                  <div className={`transform transition-transform ${expandedSection   === index ? 'rotate-180' : ''}`}>
                     ▼
                   </div>
                 </div>
@@ -166,10 +212,41 @@ export default function ProTools() {
                       </ul>
                       
                       <div className="flex space-x-4">
-                        <button onClick={() => requireAuth(() => handleSubscribe(tool.priceId, tool.title))}
-                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                          Subscribe to {tool.title} - {tool.monthlyPrice}/mo
+                        <button 
+                          onClick={paymentsEnabled ? handleCheckout:null}
+                          // onClick={() => requireAuth(() => handleCheckout(tool.priceId, tool.title))} 
+                          disabled={!paymentsEnabled || isLoading}
+                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+                          {/* {isLoading ? 'Redirecting...' : 'Subscribe to'}  */}
+                          {paymentsEnabled ? 'Subscribe':'Coming soon'} {tool.title} - {tool.monthlyPrice}/mo
                         </button>
+                         {/* 🔐 Auth Modal */}
+                              <AuthModal
+                                open={authModalOpen}
+                                onClose={() => setAuthModalOpen(false)}
+                                onSuccess={() => {
+                                  setAuthModalOpen(false);
+                                  handleCheckout(); // retry
+                                }}
+                              />
+
+                              {/* 📩 Verify Modal */}
+                              <VerifyEmailModal
+                                open={verifyModalOpen}
+                                onClose={() => setVerifyModalOpen(false)}
+                                email={user?.email}
+                                next="/pricing"
+                                onVerified={() => {
+                                  setVerifyModalOpen(false);
+
+                                  if(pendingCheckout) {
+                                    startCheckout(
+                                      pendingCheckout.priceId,
+                                      pendingCheckout.toolName
+                                    );
+                                  }                                  
+                                }}
+                              />
                         <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           Learn More
                         </button>
@@ -193,9 +270,14 @@ export default function ProTools() {
           <p className="text-green-100 mb-6">
             Get all three advanced tools together and maximize your business potential
           </p>
-          <button onClick={() => handleSubscribe(priceId)}
+          <button 
+          disabled={!paymentsEnabled || isLoading}
+          onClick={paymentsEnabled ? handleCheckout:null}
+          // onClick={() => handleCheckout(priceId) } 
+          // disabled={isLoading}
            className="bg-white text-green-600 hover:bg-green-50 px-8 py-4 rounded-xl font-bold text-lg transition-colors shadow-lg">
-            Subscribe to Pro Package - $49/month
+            {/* Subscribe to Pro Package - $49/month */}
+            {paymentsEnabled ? 'Subscribe':'Coming soon'}
           </button>
         </div>
       </div>

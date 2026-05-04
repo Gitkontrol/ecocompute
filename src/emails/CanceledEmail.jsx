@@ -1,6 +1,6 @@
 import { Html, Head, Preview, Body, Container, Text, Button, Section } from "@react-email/components";
 
-export function Cancelled({ userName, planName }) {
+export function Canceled({ userName, planName }) {
   return (
     <Html>
       <Head />

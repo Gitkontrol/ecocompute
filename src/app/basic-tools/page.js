@@ -1,5 +1,8 @@
 'use client';
 import { useState, useEffect } from 'react';
+import AuthModal from "../../components/auth/signInModal";
+import VerifyEmailModal from '@/components/auth/verifyEmailModal';
+import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRequireAuth } from '../hooks/requireAuth';
@@ -14,8 +17,34 @@ import crmAnimation from '../../../public/animations/Omnichannel CRM.json';
 import dashBoardAnimation from '../../../public/animations/Dashboard - BI.json';
 
 
-const handleSubscribe = async (priceId,toolName) => {
-  try {
+export default function BasicTools() {
+const [user, setUser] = useState(null);
+const [authModalOpen, setAuthModalOpen] = useState(false);
+const [verifyModalOpen, setVerifyModalOpen] = useState(false);
+const [isLoading, setIsLoading] = useState(false);
+const [pendingCheckout, setPendingCheckout] = useState(false);
+
+useEffect(() =>{
+  const getUser = async ()=>{
+    const { data } = await supabase.auth.getUser();
+    setUser(data.user);
+  };
+
+  getUser();
+
+  const{ data: { subscription }} = supabase.auth.onAuthStateChange((_event, session) => {
+    setUser(session?.user || null);
+  });
+
+  return () => subscription.unsubscribe();
+}, [])
+
+const startCheckout = async (priceId,toolName) => {
+  if (isLoading) return;
+
+  setIsLoading(true);
+
+   try {
     const res = await fetch('/api/stripe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -28,17 +57,33 @@ const handleSubscribe = async (priceId,toolName) => {
       window.location.href = data.url; // Redirect to Stripe Checkout
     } else {
       console.error('No URL returned from Stripe');
+      setIsLoading(false);
     }
   } catch (error) {
     console.error('Subscription error:', error);
+    setIsLoading(false);
   }
+ };
+
+ const handleCheckout = async (priceId, toolName) => {
+  setPendingCheckout({priceId, toolName})
+
+  if(!user) {
+    setAuthModalOpen(true);
+    return;
+  }
+
+  if(!user.email_confirmed_at) {
+    setVerifyModalOpen(true);
+    return;
+  }
+
+  startCheckout(priceId, toolName);
 };
 
 
-export default function BasicTools() {
   const [expandedSection, setExpandedSection] = useState(null);
   const { requireAuth } = useRequireAuth();
-
   const toggleSection = (index) => {
     setExpandedSection(expandedSection === index ? null : index);
   };
@@ -95,6 +140,7 @@ useEffect(() => {
   console.log('Page backgrounds:', { body: bodyBg, html: htmlBg });
 }, []);
 
+const paymentsEnabled = false;
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Header */}
@@ -177,10 +223,44 @@ useEffect(() => {
                       </ul>
                       
                       <div className="flex space-x-4">
-                        <button onClick={() => { console.log("SUBSCRIBE CLICKED"); requireAuth(() => {console.log("AUTH PASSED"); handleSubscribe(tool.priceId, tool.title)})}}
+                        <button 
+                        disabled={!paymentsEnabled}
+                        onClick={paymentsEnabled ? handleCheckout:null}
+                        // onClick={() => { console.log("SUBSCRIBE CLICKED"); 
+                        // requireAuth(() => {console.log("AUTH PASSED"); 
+                        // handleCheckout(tool.priceId, tool.title)})}} 
+                        // disabled={isLoading}
                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                          Subscribe to {tool.title} - {tool.monthlyPrice}/mo
+                          {/* {isLoading ? 'Redirecting...' : 'Subscribe to'} {tool.title} - {tool.monthlyPrice}/mo */}
+                          {paymentsEnabled ? 'Subscribe':'Coming soon'}
                         </button>
+                         {/* 🔐 Auth Modal */}
+                              <AuthModal
+                                open={authModalOpen}
+                                onClose={() => setAuthModalOpen(false)}
+                                onSuccess={() => {
+                                  setAuthModalOpen(false);
+                                  handleCheckout(); // retry
+                                }}
+                              />
+
+                              {/* 📩 Verify Modal */}
+                              <VerifyEmailModal
+                                open={verifyModalOpen}
+                                onClose={() => setVerifyModalOpen(false)}
+                                email={user?.email}
+                                next="/pricing"
+                                onVerified={() => {
+                                  setVerifyModalOpen(false);
+
+                                  if(pendingCheckout) {
+                                    startCheckout(
+                                      pendingCheckout.priceId,
+                                      pendingCheckout.toolName
+                                    );
+                                  }                                  
+                                }}
+                              />
                         <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           Learn More
                         </button>
@@ -204,9 +284,13 @@ useEffect(() => {
           <p className="text-blue-100 mb-6">
             Get all three tools together and save compared to purchasing individually
           </p>
-          <button onClick={() => handleSubscribe(priceId)}
+          <button 
+          disabled={!paymentsEnabled}
+          // onClick={() => handleCheckout(priceId) } 
+          // disabled={isLoading}
           className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl font-bold text-lg transition-colors shadow-lg">
-            Subscribe to Basic Package - $19/month
+            {/* Subscribe to Basic Package - $19/month */}
+            {paymentsEnabled ? 'Subscribe':'Coming soon'}
           </button>
         </div>
       </div>
