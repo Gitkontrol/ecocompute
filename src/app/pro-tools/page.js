@@ -217,8 +217,8 @@ const startCheckout = async (priceId,toolName) => {
                           // onClick={() => requireAuth(() => handleCheckout(tool.priceId, tool.title))} 
                           disabled={!paymentsEnabled || isLoading}
                           className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                          {/* {isLoading ? 'Redirecting...' : 'Subscribe to'}  */}
-                          {paymentsEnabled ? 'Subscribe':'Coming soon'} {tool.title} - {tool.monthlyPrice}/mo
+                          {/* {isLoading ? 'Redirecting...' : 'Subscribe to'}  {tool.title} - {tool.monthlyPrice}/mo */}
+                          {paymentsEnabled ? 'Subscribe':'Coming soon'} 
                         </button>
                          {/* 🔐 Auth Modal */}
                               <AuthModal
