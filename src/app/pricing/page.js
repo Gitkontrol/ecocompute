@@ -43,7 +43,7 @@ export default function Pricing() {
              <div className="relative text-wrap left-52 bottom-10 z-10 transition whitespace-nowrap rounded-full h-24 w-24 dark:border-purple-300 dark:bg-blue-700 dark:text-purple-200 bg-purple-200 px-3 py-1 text-lg font-medium text-blue-700">
               <div className='absolute top-5 font-shadows font-bold'>Try FREE! for 2 days </div>
             </div>
-            <ul className="absolute z-30 space-y-3 mb-6 top-[450]">
+            <ul className="absolute space-y-3 top-[450px]">
               <li className="flex items-center gap-2"><Cloud className="text-blue-500" /> Cloud Storage</li>
               <li className="flex items-center gap-2"><Database className="text-blue-500" /> Data Analytics</li>
               <li className="flex items-center gap-2"><Shield className="text-blue-500" /> Enhanced Security</li>
