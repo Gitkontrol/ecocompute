@@ -21,7 +21,7 @@ export default function Contact() {
           </div>
           <div className="flex items-center gap-3">
             <MapPin className="text-blue-500" />
-            <span className="text-gray-800 dark:text-gray-200"></span>
+            <span className="text-gray-800 dark:text-gray-200">4268 South Black Horse Pike Williamstown, New Jersey 08094 </span>
           </div>
         </div>
       </div>
