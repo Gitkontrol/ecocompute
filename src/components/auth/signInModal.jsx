@@ -1,9 +1,12 @@
+'use Client'
+
 import { Alert, Snackbar, Dialog, Fade } from "@mui/material";
 import { useState } from "react";
+import { supabase } from "@/lib/supabaseClient";
 
 
 
-export default function Authmodal() {
+export default function Authmodal({open, onClose}) {
     const [authNoticeOpen, setAuthNoticeOpen] = useState(false);
 
     supabase.auth.onAuthStateChange((event, session) => {

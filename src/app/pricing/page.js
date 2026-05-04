@@ -20,7 +20,7 @@ export default function Pricing() {
             <div className="relative left-52 bottom-10 whitespace-nowrap text-wrap rounded-full h-24 w-24 transition dark:text-blue-100 dark:bg-blue-700 bg-blue-100 px-3 py-1 text-lg font-medium text-blue-700">
               <div className='absolute top-5 font-shadows font-bold'>Try FREE! for 3 days</div>
             </div>
-            <ul className="absolute top-[450] space-y-3 mb-6">
+            <ul className="top-[450px] space-y-3 mb-6">
               <li className="flex items-center gap-2"><CheckCircle className="text-blue-500" /> Email Hosting</li>
               <li className="flex items-center gap-2"><CheckCircle className="text-blue-500" /> Project Tracker</li>
               <li className="flex items-center gap-2"><CheckCircle className="text-blue-500" /> CRM Access</li>

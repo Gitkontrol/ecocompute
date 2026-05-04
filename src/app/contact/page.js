@@ -13,15 +13,15 @@ export default function Contact() {
         <div className="space-y-6 text-left bg-white dark:bg-gray-800 rounded-xl p-8 shadow-md">
           <div className="flex items-center gap-3">
             <Mail className="text-blue-500" />
-            <span className="text-gray-800 dark:text-gray-200">support@servana.com</span>
+            <span className="text-gray-800 dark:text-gray-200">support@ecocompute.tech</span>
           </div>
           <div className="flex items-center gap-3">
             <Phone className="text-blue-500" />
-            <span className="text-gray-800 dark:text-gray-200">+1 (555) 123-4567</span>
+            <span className="text-gray-800 dark:text-gray-200">+1 (925) 727-3169</span>
           </div>
           <div className="flex items-center gap-3">
             <MapPin className="text-blue-500" />
-            <span className="text-gray-800 dark:text-gray-200">123 Tech Avenue, Lagos, Nigeria</span>
+            <span className="text-gray-800 dark:text-gray-200"></span>
           </div>
         </div>
       </div>
