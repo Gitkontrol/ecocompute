@@ -2,12 +2,14 @@
 
 import { useState } from 'react';
 import { Button, Typography } from '@mui/material';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabaseClient';
+
 
 export default function ResendEmail({ email }) {
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [message, setMessage] = useState('');
+  const supabase = createClient();
 
   const handleResend = async () => {
     if (!email) return;

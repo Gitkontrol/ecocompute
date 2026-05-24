@@ -27,7 +27,7 @@ export default function Pricing() {
             </ul>
             
             <Link href="/basic-tools">
-              <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition mt-12">
+              <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition mt-12">
                 View Basic Tools
               </button>
             </Link>
@@ -50,7 +50,7 @@ export default function Pricing() {
             </ul>
             
             <Link href="/pro-tools">
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition mt-12">
+            <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition mt-12">
               Subscribe Now
             </button>
             </Link>           
@@ -68,7 +68,7 @@ export default function Pricing() {
             </ul>
 
             <Link href="/contact">
-            <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 rounded-lg transition">
+            <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition">
               Contact Sales
             </button>
             </Link>

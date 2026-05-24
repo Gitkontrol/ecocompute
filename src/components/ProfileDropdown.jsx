@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { supabase } from '../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import SignInForm from './auth/SignInForm'
 import AuthButtons from './auth/OAuthButtons'
 import SignupLink from './auth/SignupLink'
@@ -10,8 +10,7 @@ import Link from 'next/link'
 import clsx from 'clsx'
 
 function getOAuthAvatar(user) {
-  return (
-    user?.avatar || // <-- ADD THIS LINE!
+  return (       
     user?.user_metadata?.avatar_url ||
     user?.user_metadata?.picture ||
     user?.identities?.[0]?.identity_data?.avatar_url ||
@@ -21,12 +20,33 @@ function getOAuthAvatar(user) {
 }
 
 
-export default function ProfileDropdown({ session, user, isEmailAuth, inputVariant = "dropdown" }) {
-  const [open, setOpen] = useState(false)
+export default function ProfileDropdown({ inputVariant = "dropdown" }) {
+  const [open, setOpen] = useState(false);
+  const [session, setSession] = useState(null);
+  const [user, setUser] = useState(null);
+  const isEmailAuth = user?.app_metadata?.provider === 'email';
+  const oauthAvatar = getOAuthAvatar(user);
+ 
+
   const ref = useRef(null)
-  const oauthAvatar = getOAuthAvatar(user)
-  const version = inputVariant
-  
+
+  useEffect(() => {
+    // Get initial session
+    supabase.auth.getSession().then(({ data }) => {
+      setSession(data.session)
+      setUser(data.session?.user ?? null)
+    })
+
+    // Listen for auth changes
+    const { data: listener } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setSession(session)
+        setUser(session?.user ?? null)
+      }
+    )
+
+     return () => listener.subscription.unsubscribe()
+  }, [])
   
   // Close on outside click
   useEffect(() => {
@@ -55,7 +75,7 @@ export default function ProfileDropdown({ session, user, isEmailAuth, inputVaria
           <>
             {isEmailAuth ? (
                 <Avatar user={user} size={36} />
-              ) : oauthAvatar ? (
+              ) : oauthAvatar? (
                 <img
                   src={oauthAvatar}
                   alt="User avatar"
@@ -101,9 +121,9 @@ export default function ProfileDropdown({ session, user, isEmailAuth, inputVaria
         <div className="flex items-center gap-3 border-b px-2 py-3 dark:border-gray-700">
           {isEmailAuth ? (
           <Avatar user={user} size={36} />
-        ) : oauthAvatar ? (
+        ) : getOAuthAvatar(user) ? (
             <img
-              src={oauthAvatar}
+              src={getOAuthAvatar(user)}
               alt="User avatar"
               className="w-8 h-8 rounded-full object-cover"
               referrerPolicy="no-referrer"

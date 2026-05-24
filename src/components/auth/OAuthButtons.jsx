@@ -1,11 +1,12 @@
 'use client';
-import { supabase } from '../../lib/supabaseClient'; // Import Supabase
+import { supabase } from '@/lib/supabaseClient'
 import Image from "next/image"
 
 export default function OAuthButtons() {  
   // Supabase OAuth login function
-
+ 
   const customScopes = 'email profile'
+  
   const handleOAuthLogin = async (provider) => {
     try {
       const { data, error } = await supabase.auth.signInWithOAuth({
@@ -14,19 +15,27 @@ export default function OAuthButtons() {
           redirectTo: `${window.location.origin}/auth/callback`, // Important!
           // You can also add scopes if needed
           scopes: customScopes,
-        }
+
+          queryParams: {
+            prompt: 'select_account',
+          },
+        },
       });
       
       if (error) {
         console.error('OAuth error:', error);
         // Handle error (show toast, etc.)
+        return;
       }
-    } catch (error) {
-      console.error('Login error:', error);
+       if (data?.url) {
+      window.location.href = data.url;
     }
-  };
 
-
+  } catch (error) {
+    console.error('Login error:', error);
+  }
+};
+  
   return (
     <div className="w-full p-2 text-sm rounded-md dark:bg-transparent bg-transparent space-y-1 text-gray-800 transition">
       <button

@@ -7,6 +7,7 @@ import SignIn from './SignInForm'
 import AuthButtons from './OAuthButtons'
 import Signup from './SignupLink'
 
+
 export default function AuthModal({ variant = "modal" }) {
   const { open, closeAuthModal } = useAuthModal()
   const inputStyles = variant === "modal"
@@ -77,10 +78,10 @@ export default function AuthModal({ variant = "modal" }) {
                 </div>
               </div>
 
-              {/* SIGNUP */}
+              {/* SIGNUP
               <div className="mt-6 text-center">
                 <Signup />
-              </div>
+              </div> */}
             </motion.div>
           </motion.div>
         </Portal>

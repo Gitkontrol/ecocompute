@@ -104,12 +104,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Box, Button,  Typography,  Paper,  CircularProgress, } from '@mui/material';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabaseClient'
 
 export default function SuccessClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  
+  const supabase = createClient();
   const [email, setEmail] = useState('');
 
   useEffect(() => {

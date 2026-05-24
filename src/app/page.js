@@ -4,20 +4,23 @@ import { useEffect, useRef } from "react";
 import { useRouter } from 'next/navigation';
 import ServiceCard from "../components/ServiceCard";
 import AuthModal from "../components/auth/AuthModal";
-import { useSupabaseAuth } from "./hooks/useSupabaseSession"; // ← CHANGE THIS
-import AuthController from "../components/AuthController"
+import AuthController from "../components/AuthController";
 import { useRequireAuth } from "./hooks/requireAuth";
+import { useSupabaseAuth } from "./hooks/useSupabaseSession";
 
 
 
 export default function Home() {
   
-  const dropdownRef = useRef(null);
-  const { session, loading } = useSupabaseAuth(); // ← CHANGE THIS
-  const router = useRouter()
+ const dropdownRef = useRef(null);
+
+  const { session, loading } = useSupabaseAuth();
+
+  const router = useRouter();
+
   const { requireAuth } = useRequireAuth();
 
-  console.log("SESSION:", session);
+  const isSignedIn = !!session;
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -32,34 +35,22 @@ export default function Home() {
     document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
     };
   }, []);
-
-  // Add to both page components
-useEffect(() => {
-  const bodyBg = getComputedStyle(document.body).backgroundColor;
-  const htmlBg = getComputedStyle(document.documentElement).backgroundColor;
-  console.log('Page backgrounds:', { body: bodyBg, html: htmlBg });
-}, []);
-
 
   const handleClick = () => {
     requireAuth(() => {
       router.push("/dashboard");
     });
   };
+
   
-
-  if (loading) { // ← CHANGE THIS
-    return (
-      <button className="px-6 py-3 rounded-md bg-gray-400 text-white cursor-not-allowed">
-        Loading…
-      </button>
-    )
-  }
-
-  const isSignedIn = !!session // ← This stays the same
+  console.log("SESSION:", session);
+  
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
@@ -82,10 +73,15 @@ useEffect(() => {
         {/* Get Started Button — opens Auth Modal */}
         <div className="flex justify-center mt-0">
           <button
+            disabled={loading}
             onClick={handleClick}
             className="bg-blue-500 hover:bg-blue-400 dark:hover:bg-blue-600 transition text-white font-shadows font-bold text-2xl px-6 py-3 rounded-xl"
           >
-            {isSignedIn ? 'Go to Dashboard' : 'Get Started'}
+            {loading
+          ? "Loading..."
+          : isSignedIn
+          ? "Go to Dashboard"
+          : "Get Started"}
           </button>
         </div>
 

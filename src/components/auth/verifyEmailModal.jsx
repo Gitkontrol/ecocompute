@@ -2,11 +2,12 @@ import { useState, useEffect } from 'react';
 import {  Dialog,  DialogTitle,  DialogContent,  DialogActions,  Button,  Typography, } from '@mui/material';
 import { supabase } from '@/lib/supabaseClient';
 
+
 export default function VerifyEmailModal({ open, onClose, email, onVerified }) {
   const [cooldown, setCooldown] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('');
-
+  
   useEffect(() => {
   if (!open) return; // only listen when modal is open
 

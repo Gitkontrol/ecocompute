@@ -1,14 +1,20 @@
 'use client';
 import { useState } from 'react';
-import { supabase } from '../../lib/supabaseClient'
+import { supabase } from '@/lib/supabaseClient'
 import { Loader2 } from 'lucide-react';
 import { PasswordInput } from '../RevealPassword';
+import { useRouter } from 'next/navigation';
+
 
 export default function SignInForm({ onSuccess, variant = 'modal' }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
-  const [password, setShowPassword] = useState("");
+  const [password, setShowPassword] = useState('');
   const version = variant;
+  
+
+  
+  // const router = useRouter();
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -68,10 +74,19 @@ return (
       <button
         type="submit"
         disabled={loading}
-        className="w-full p-2 text-sm rounded-md bg-blue-600 hover:bg-blue-700 text-white"
+        className="w-full p-2 text-sm rounded-md bg-blue-600 hover:bg-blue-500 text-white"
       >
         {loading ? <Loader2 className="animate-spin" /> : "Sign In"}
       </button>
+      {/* <button
+        className='w-full p-2 text-sm rounded-md bg-blue-600 hover:bg-blue-500 text-white'
+        onClick={() => {
+          router.push('/signup');
+          onSuccess?.();          
+        }}
+      >
+        Create Account
+      </button> */}
      
     </form>
   );

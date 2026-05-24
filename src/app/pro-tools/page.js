@@ -23,6 +23,7 @@ const [verifyModalOpen, setVerifyModalOpen] = useState(false);
 const [isLoading, setIsLoading] = useState(false);
 const [pendingCheckout, setPendingCheckout] = useState(false);
 
+
 useEffect(() =>{
   const getUser = async ()=>{
     const { data } = await supabase.auth.getUser();
@@ -216,7 +217,7 @@ const startCheckout = async (priceId,toolName) => {
                           onClick={paymentsEnabled ? handleCheckout:null}
                           // onClick={() => requireAuth(() => handleCheckout(tool.priceId, tool.title))} 
                           disabled={!paymentsEnabled || isLoading}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+                          className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
                           {/* {isLoading ? 'Redirecting...' : 'Subscribe to'}  {tool.title} - {tool.monthlyPrice}/mo */}
                           {paymentsEnabled ? 'Subscribe':'Coming soon'} 
                         </button>

@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { Box, Button, TextField, Typography, Paper, Divider } from '@mui/material'
-import { supabase } from '../../lib/supabaseClient'
+import { createClient } from '@/lib/supabaseClient';
 import { useRouter } from "next/navigation"
 
 
@@ -12,6 +12,7 @@ export default function SignupPage() {
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
+  const supabase = createClient();
 
   const handleSignup = async () => {
   if (loading) return // prevent double submit

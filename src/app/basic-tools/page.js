@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import AuthModal from "../../components/auth/signInModal";
 import VerifyEmailModal from '@/components/auth/verifyEmailModal';
-import { supabase } from '@/lib/supabaseClient';
+import { createClient } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRequireAuth } from '../hooks/requireAuth';
@@ -23,6 +23,7 @@ const [authModalOpen, setAuthModalOpen] = useState(false);
 const [verifyModalOpen, setVerifyModalOpen] = useState(false);
 const [isLoading, setIsLoading] = useState(false);
 const [pendingCheckout, setPendingCheckout] = useState(false);
+const supabase = createClient();
 
 useEffect(() =>{
   const getUser = async ()=>{
@@ -37,7 +38,7 @@ useEffect(() =>{
   });
 
   return () => subscription.unsubscribe();
-}, [])
+}, [supabase.auth])
 
 const startCheckout = async (priceId,toolName) => {
   if (isLoading) return;
