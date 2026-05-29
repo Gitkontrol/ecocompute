@@ -1,15 +1,13 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { useAuthModal } from '../context/AuthModalContext'
 import { Portal } from '../PortalWrapper'
 import SignIn from './SignInForm'
 import AuthButtons from './OAuthButtons'
 import Signup from './SignupLink'
 
-
 export default function AuthModal({ variant = "modal" }) {
-  const { open, closeAuthModal } = useAuthModal()
+  
   const inputStyles = variant === "modal"
     ? "dark:bg-gray-800 border-gray-600 dark:border-gray-600 text-white dark:text-white"
     : "bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white";

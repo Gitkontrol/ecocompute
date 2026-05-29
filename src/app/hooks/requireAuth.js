@@ -8,20 +8,24 @@ export function useRequireAuth() {
   const { session, loading } = useSupabaseAuth();
   const { openAuthModal } = useAuthModal();
   const user = session?.user;
+  
 
  const requireAuth = useCallback(
-  (callback) => {
+   (callback, options = {}) => {
     if (!user) {
-      console.log("User not logged in, opening modal");
       openAuthModal();
       return;
     }
 
-    if (user && typeof callback === "function") {
+    if (options.requireVerified && !user.email_confirmed_at) {
+      openVerifyModal();
+      return;
+    }
+
+    if (typeof callback === "function") {
       callback(user);
     }
   },
-  
   [user, openAuthModal]
   
 );

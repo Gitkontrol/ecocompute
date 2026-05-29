@@ -49,7 +49,7 @@ const Navbar = () => {
         {/* LOGO */}
         <div className="logo-container flex items-center h-10 overflow-hidden">
           <Image
-            src="/ecocompute-transparent.png"
+            src="/logo.png"
             alt="ecocompute logo"
             width={140}
             height={20}

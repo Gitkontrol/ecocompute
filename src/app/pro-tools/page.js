@@ -12,17 +12,12 @@ import cloudStorageAnimation from '../../../public/animations/Cloud Computing.js
 import dataAnalyticsAnimation from '../../../public/animations/Analytics Character Animation.json';
 import securityAnimation from '../../../public/animations/Security Lock - Privacy.json';
 import { supabase } from '@/lib/supabaseClient';
-import AuthModal from '@/components/auth/signInModal';
-import VerifyEmailModal from '@/components/auth/verifyEmailModal';
+import GlobalModal from '@/components/auth/GlobalAuth';
 
 
 export default function ProTools() {
 const [user, setUser] = useState(null);
-const [authModalOpen, setAuthModalOpen] = useState(false);
-const [verifyModalOpen, setVerifyModalOpen] = useState(false);
 const [isLoading, setIsLoading] = useState(false);
-const [pendingCheckout, setPendingCheckout] = useState(false);
-
 
 useEffect(() =>{
   const getUser = async ()=>{
@@ -39,7 +34,7 @@ useEffect(() =>{
   return () => subscription.unsubscribe();
 }, [])
 
-const startCheckout = async (priceId,toolName) => {
+const startCheckout = async ( priceId, toolName ) => {
   if (isLoading) return;
 
   setIsLoading(true);
@@ -214,40 +209,16 @@ const startCheckout = async (priceId,toolName) => {
                       
                       <div className="flex space-x-4">
                         <button 
-                          onClick={paymentsEnabled ? handleCheckout:null}
-                          // onClick={() => requireAuth(() => handleCheckout(tool.priceId, tool.title))} 
+                          // onClick={paymentsEnabled ? handleCheckout:null}
+                          onClick={() => requireAuth(() => startCheckout(priceId, toolName), {requireVerified: true} )} 
                           disabled={!paymentsEnabled || isLoading}
                           className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
                           {/* {isLoading ? 'Redirecting...' : 'Subscribe to'}  {tool.title} - {tool.monthlyPrice}/mo */}
                           {paymentsEnabled ? 'Subscribe':'Coming soon'} 
                         </button>
                          {/* 🔐 Auth Modal */}
-                              <AuthModal
-                                open={authModalOpen}
-                                onClose={() => setAuthModalOpen(false)}
-                                onSuccess={() => {
-                                  setAuthModalOpen(false);
-                                  handleCheckout(); // retry
-                                }}
-                              />
+                            <GlobalModal />
 
-                              {/* 📩 Verify Modal */}
-                              <VerifyEmailModal
-                                open={verifyModalOpen}
-                                onClose={() => setVerifyModalOpen(false)}
-                                email={user?.email}
-                                next="/pricing"
-                                onVerified={() => {
-                                  setVerifyModalOpen(false);
-
-                                  if(pendingCheckout) {
-                                    startCheckout(
-                                      pendingCheckout.priceId,
-                                      pendingCheckout.toolName
-                                    );
-                                  }                                  
-                                }}
-                              />
                         <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           Learn More
                         </button>

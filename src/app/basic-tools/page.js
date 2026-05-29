@@ -1,7 +1,6 @@
 'use client';
 import { useState, useEffect } from 'react';
-import AuthModal from "../../components/auth/signInModal";
-import VerifyEmailModal from '@/components/auth/verifyEmailModal';
+import GlobalModal from '@/components/auth/GlobalAuth';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -17,12 +16,11 @@ import crmAnimation from '../../../public/animations/Omnichannel CRM.json';
 import dashBoardAnimation from '../../../public/animations/Dashboard - BI.json';
 
 
+
 export default function BasicTools() {
 const [user, setUser] = useState(null);
-const [authModalOpen, setAuthModalOpen] = useState(false);
-const [verifyModalOpen, setVerifyModalOpen] = useState(false);
 const [isLoading, setIsLoading] = useState(false);
-const [pendingCheckout, setPendingCheckout] = useState(false);
+
 
 useEffect(() =>{
   const getUser = async ()=>{
@@ -39,7 +37,7 @@ useEffect(() =>{
   return () => subscription.unsubscribe();
 }, [])
 
-const startCheckout = async (priceId,toolName) => {
+const startCheckout = async ( priceId, toolName ) => {
   if (isLoading) return;
 
   setIsLoading(true);
@@ -65,23 +63,7 @@ const startCheckout = async (priceId,toolName) => {
   }
  };
 
- const handleCheckout = async (priceId, toolName) => {
-  setPendingCheckout({priceId, toolName})
-
-  if(!user) {
-    setAuthModalOpen(true);
-    return;
-  }
-
-  if(!user.email_confirmed_at) {
-    setVerifyModalOpen(true);
-    return;
-  }
-
-  startCheckout(priceId, toolName);
-};
-
-
+ 
   const [expandedSection, setExpandedSection] = useState(null);
   const { requireAuth } = useRequireAuth();
   const toggleSection = (index) => {
@@ -225,42 +207,19 @@ const paymentsEnabled = false;
                       <div className="flex space-x-4">
                         <button 
                         disabled={!paymentsEnabled}
-                        onClick={paymentsEnabled ? handleCheckout:null}
-                        // onClick={() => { console.log("SUBSCRIBE CLICKED"); 
-                        // requireAuth(() => {console.log("AUTH PASSED"); 
-                        // handleCheckout(tool.priceId, tool.title)})}} 
-                        // disabled={isLoading}
+                        // onClick={paymentsEnabled ? handleCheckout:null}
+                        onClick={() => { console.log("SUBSCRIBE CLICKED"); 
+                        requireAuth(() => {console.log("AUTH PASSED"); 
+                        startCheckout(priceId, toolName), {requireVerified: true}})}} 
+                        // disabled= {isLoading}
                          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
                           {/* {isLoading ? 'Redirecting...' : 'Subscribe to'} {tool.title} - {tool.monthlyPrice}/mo */}
                           {paymentsEnabled ? 'Subscribe':'Coming soon'}
                         </button>
+
                          {/* 🔐 Auth Modal */}
-                              <AuthModal
-                                open={authModalOpen}
-                                onClose={() => setAuthModalOpen(false)}
-                                onSuccess={() => {
-                                  setAuthModalOpen(false);
-                                  handleCheckout(); // retry
-                                }}
-                              />
-
-                              {/* 📩 Verify Modal */}
-                              <VerifyEmailModal
-                                open={verifyModalOpen}
-                                onClose={() => setVerifyModalOpen(false)}
-                                email={user?.email}
-                                next="/pricing"
-                                onVerified={() => {
-                                  setVerifyModalOpen(false);
-
-                                  if(pendingCheckout) {
-                                    startCheckout(
-                                      pendingCheckout.priceId,
-                                      pendingCheckout.toolName
-                                    );
-                                  }                                  
-                                }}
-                              />
+                            <GlobalModal />
+                             
                         <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           Learn More
                         </button>

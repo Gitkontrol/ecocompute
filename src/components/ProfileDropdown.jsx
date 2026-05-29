@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { supabase } from '@/lib/supabaseClient'
+import { getDiceBearAvatar } from '@/app/utils/dicebear'
 import SignInForm from './auth/SignInForm'
 import AuthButtons from './auth/OAuthButtons'
 import SignupLink from './auth/SignupLink'
@@ -10,12 +11,23 @@ import Link from 'next/link'
 import clsx from 'clsx'
 
 function getOAuthAvatar(user) {
+   if (!user) return null
+
+  const metadata = user.user_metadata || {}
+   
+
   return (       
     user?.user_metadata?.avatar_url ||
     user?.user_metadata?.picture ||
     user?.identities?.[0]?.identity_data?.avatar_url ||
     user?.identities?.[0]?.identity_data?.picture ||
-    null
+     getDiceBearAvatar(
+      metadata.full_name ||
+      metadata.name ||
+      user.email ||
+      "user"
+    )
+    
   )
 }
 

@@ -1,104 +1,3 @@
-// 'use client'
-
-// import { useSearchParams, useRouter } from 'next/navigation'
-// import { Box, Button, Typography, Paper } from '@mui/material'
-// import ResendEmail from '@/components/auth/ResendEmail'
-
-
-// export default function SignupSuccessPage() {
-//   const params = useSearchParams()
-//   const router = useRouter()
-
-//   const type = params.get('type') // "verified" | "confirm"
-
-//   const isVerified = type === 'verified'
-
-//   return (
-//     <Box
-//       minHeight="80vh"
-//       display="flex"
-//       alignItems="center"
-//       justifyContent="center"
-//       px={2}
-//     >
-//       <Paper elevation={3} sx={{ p: 4, maxWidth: 420, width: '100%', textAlign: 'center' }} className='space-y-3'>        
-//         <Typography variant="h5" gutterBottom>
-//           {isVerified ? 'Account Created!' : (
-//           <span style={{
-//             display: 'inline-flex',
-//             alignItems: 'center',
-//             justifyContent: 'center',
-//             gap: '8px'
-//           }}>
-//             Check your email            
-//           </span>)}
-//           <img 
-//               src='/delivered.png' 
-//               alt='delivered' 
-//               height={120} 
-//               width={120}
-//               className='relative left-32'
-//             />
-//         </Typography>
-//         {isVerified ? <img
-//           src='/verified48.png'
-//           alt='correct'
-//           height={70}
-//           width={70}
-//           className='flex mx-auto'
-//         /> : ''}
-        
-
-//         <Typography variant="body1" sx={{ mb: 3 }}>
-//           {isVerified
-//             ? 'Your account has been successfully created. You can now access your dashboard.'
-//             : 'We’ve sent a confirmation link to your email. Please confirm your account to continue.'}
-//         </Typography>
-        
-        
-//         {!isVerified && (
-//           <Typography
-//             variant="body2"
-//             sx={{
-//               color: 'text.secondary',
-//               backgroundColor: 'rgba(0,0,0,0.03)',
-//               px: 2,
-//               py: 1.5,
-//               borderRadius: 1,
-//             }}
-//           >
-//             You can explore the platform without confirming your email, but you’ll be required to verify your account before completing any purchase.
-//           </Typography>
-//         )}
-//             <div className='grid'>
-//               {isVerified && (
-//                 <Button
-//                   variant="contained"
-//                   fullWidth
-//                   sx={{ mb: 2 }}
-//                   onClick={() => router.push('/dashboard')}
-//                 >
-//                   Go to Dashboard
-//                 </Button>
-//               )}
-//               <div className='pt-10'/>
-
-//               <Button
-//                 variant="outlined"
-                
-//                 onClick={() => router.push('/')}
-//                 className='hover:bg-blue-600 hover:text-white'
-//               >
-//                 Back to Homepage
-//               </Button>
-//               <ResendEmail />
-//             </div>
-//       </Paper>
-//     </Box>
-//   )
-// }
-
-
 'use client';
 
 import { useEffect, useState } from 'react';
@@ -138,6 +37,15 @@ export default function SuccessClient() {
     const checkSession = async () => {
       const { data } = await supabase.auth.getSession();
       setSession(data.session);
+
+      // 🔥 session already exists
+    if (data.session) {
+      router.refresh();
+      localStorage.removeItem('signup_email');
+
+      router.replace('/');
+      return;
+    }
       setLoading(false);
     };
 
@@ -145,36 +53,25 @@ export default function SuccessClient() {
   }, []);
 
   // 🔥 Real-time auth listener (replaces polling)
-  useEffect(() => {
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        setSession(session);
+ useEffect(() => {
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange((event, session) => {
+    setSession(session);
 
-        // small delay for smoother UX
-        setTimeout(() => {
-          router.push('/');
-        }, 1200);
-      }
-    });
+    if (event === 'SIGNED_IN' && session) {
+      localStorage.removeItem('signup_email');
 
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [router]);
+      setTimeout(() => {
+        router.replace('/');
+      }, 800);
+    }
+  });
 
-  // 🚀 Redirect if already verified
-  useEffect(() => {
-  if (session) {
-    localStorage.removeItem('signup_email'); // cleanup
+  return () => subscription.unsubscribe();
+}, [router]);
 
-    setTimeout(() => {
-      router.push('/');
-    }, 1200);
-  }
-}, [session, router]);
-
+  
   // 📩 Resend email
   const handleResend = async () => {
     if (!email) {

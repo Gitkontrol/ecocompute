@@ -35,7 +35,9 @@ export async function GET(request) {
 
   if (error) {
     console.error("OAuth exchange error:", error);
+     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return NextResponse.redirect(new URL("/", request.url));
+  return NextResponse.redirect(new URL("/signup/success", request.url));
+ 
 }
