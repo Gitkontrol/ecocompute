@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { Box, Button, TextField, Typography, Paper, Divider } from '@mui/material'
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from "next/navigation"
+import { getAuthErrorMessage } from '@/lib/auth/getErrorMsg';
 
 
 export default function SignupPage() {
@@ -25,23 +26,15 @@ export default function SignupPage() {
       email,
       password,
       options: {
-        emailRedirectTo: `${window.location.origin}/signup/success?email=${encodeURIComponent(email)}`,
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
       },
     })
 
     
     // 1️⃣ Handle Supabase errors cleanly
-    if (error) {
-      if (error.message.toLowerCase().includes('already registered')) {
-        setMessage('This email is already registered. Please sign in instead.')
-      } else {
-        setMessage(error.message)
+    if (error) {      
+        setMessage(getAuthErrorMessage(error))
       }
-
-      // Clear any partial auth state
-      await supabase.auth.signOut()
-      return
-    }
 
       if (data?.session) {
     router.push('/signup/success?type=verified')
@@ -149,14 +142,7 @@ export default function SignupPage() {
             Email me a magic link
           </Button> */}
 
-          <Typography
-            variant="body2"
-            align="center"
-            sx={{ mt: 2 }}
-          >
-            <a href="/forgot-password">Forgot password?</a>
-          </Typography>
-
+          
           {message && (
             <Typography
               variant="body2"

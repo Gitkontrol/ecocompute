@@ -1,4 +1,4 @@
-import { useAuthModal } from "@/context/AuthModalContext";
+import { useAuthModal } from "../context/AuthModalContext";
 import VerifyModal from "./verifyEmailModal";
 import AuthModal from "./AuthModal";
 

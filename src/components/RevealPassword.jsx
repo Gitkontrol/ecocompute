@@ -5,20 +5,23 @@ import Image from "next/image";
 import { Eye, EyeOff } from "lucide-react";
 
 export function PasswordInput({
+  name,
   value,
   onChange,
   placeholder = "Password",
   variant = "modal"
 
 }) {
+  
   const [showPassword, setShowPassword] = useState(false);
-const inputStyles = variant === "modal"
-    ? "dark:bg-gray-800 border-gray-600 dark:border-gray-600 text-white dark:text-white"
-    : "bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"; 
+  const inputStyles = variant === "modal"
+      ? "dark:bg-gray-800 border-gray-600 dark:border-gray-600 text-white dark:text-white"
+      : "bg-transparent border-gray-300 dark:border-gray-700 text-gray-900 dark:text-white"; 
 
   return (
     <div className="relative">
       <input
+        name={name}
         type={showPassword ? "text" : "password"}
         value={value}
         onChange={onChange}

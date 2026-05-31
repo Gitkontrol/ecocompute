@@ -30,14 +30,17 @@ export async function GET(request) {
       },
     }
   );
+ 
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code);
+  const { data, error } = await supabase.auth.exchangeCodeForSession(code);
 
-  if (error) {
-    console.error("OAuth exchange error:", error);
-     return NextResponse.redirect(new URL("/", request.url));
+  if (error || !data?.session) {
+    console.error("Auth exchange error:", error);
+    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return NextResponse.redirect(new URL("/signup/success", request.url));
+  return NextResponse.redirect(
+  new URL("/signup/success?type=verified", request.url)
+)
  
 }

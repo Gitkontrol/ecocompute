@@ -7,7 +7,7 @@ import AuthModal from "../components/auth/AuthModal";
 import AuthController from "../components/AuthController";
 import { useRequireAuth } from "./hooks/requireAuth";
 import { useSupabaseAuth } from "./hooks/useSupabaseSession";
-
+import { useAuthModal } from "@/components/context/AuthModalContext";
 
 
 export default function Home() {
@@ -21,6 +21,16 @@ export default function Home() {
   const { requireAuth } = useRequireAuth();
 
   const isSignedIn = !!session;
+
+  const {
+  open,
+  openModal,
+  closeModal,
+} = useAuthModal();
+
+
+  
+  
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -43,9 +53,11 @@ export default function Home() {
   }, []);
 
   const handleClick = () => {
-    requireAuth(() => {
+  if (isSignedIn) {
       router.push("/dashboard");
-    });
+    }else {
+      openModal();
+    };
   };
 
   
@@ -86,7 +98,7 @@ export default function Home() {
         </div>
 
         {/* Modal */}
-        <AuthModal />
+        <AuthModal  closeAuthModal ={closeModal} open ={open} />
 
         {/* Services Section */}
         <section className="max-w-6xl mx-auto pt-10">

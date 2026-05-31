@@ -1,50 +1,23 @@
 "use client";
+
 import { createContext, useContext, useState } from "react";
 
 const AuthModalContext = createContext();
 
 export function AuthModalProvider({ children }) {
-  const [modalState, setModalState] = useState({
-    isOpen: false,
-    type: null, // 'auth' | 'verify'
-    payload: null,
-  });
+  const [open, setOpen] = useState(false);
 
-  const openAuthModal = (payload = null) => {
-    console.log("AUTH MODAL OPENED");
-    setModalState({
-      isOpen: true,
-      type: "auth",
-      payload,
-    });
-  };
+  // open modal
+  const openModal = () => setOpen(true);
 
-  const openVerifyModal = (payload = null) => {
-    console.log("VERIFY MODAL OPENED");
-    setModalState({
-      isOpen: true,
-      type: "verify",
-      payload,
-    });
-  };
-
-  const closeModal = () => {
-    setModalState({
-      isOpen: false,
-      type: null,
-      payload: null,
-    });
-  };
+  // close modal
+  const closeModal = () => setOpen(false);
 
   return (
     <AuthModalContext.Provider
       value={{
-        modalState,
-        isOpen: modalState.isOpen,
-        modalType: modalState.type,
-        payload: modalState.payload,
-        openAuthModal,
-        openVerifyModal,
+        open,
+        openModal,
         closeModal,
       }}
     >
@@ -53,4 +26,14 @@ export function AuthModalProvider({ children }) {
   );
 }
 
-export const useAuthModal = () => useContext(AuthModalContext);
+export function useAuthModal() {
+  const context = useContext(AuthModalContext);
+
+  if (!context) {
+    throw new Error(
+      "useAuthModal must be used within an AuthModalProvider"
+    );
+  }
+
+  return context;
+}

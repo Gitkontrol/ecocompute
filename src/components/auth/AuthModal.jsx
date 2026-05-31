@@ -6,7 +6,7 @@ import SignIn from './SignInForm'
 import AuthButtons from './OAuthButtons'
 import Signup from './SignupLink'
 
-export default function AuthModal({ variant = "modal" }) {
+export default function AuthModal({ variant = "modal", closeAuthModal, open  }) {
   
   const inputStyles = variant === "modal"
     ? "dark:bg-gray-800 border-gray-600 dark:border-gray-600 text-white dark:text-white"
