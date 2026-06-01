@@ -18,17 +18,27 @@ export function normalizeAuthError(error) {
     case "weak_password":
       return AUTH_ERROR_CODES.weak_password;
 
-    case "over_email_send_rate_limit":
-    case "over_request_rate_limit":
+    case "over_email_send_rate_limit":    
       return AUTH_ERROR_CODES.over_email_send_rate_limit;
 
     case "session_not_found":
       return AUTH_ERROR_CODES.session_not_found;
 
     case "signup_disabled":
-      return AUTH_ERROR_CODES.signup_disabled;
+      return AUTH_ERROR_CODES.signup_disabled;    
+    
+    case "password_conflict":
+      return AUTH_ERROR_CODES.password_conflict;
+
+    case "password_character_length":
+      return AUTH_ERROR_CODES.password_character_length;
+
+    case "invalid_JWT":
+      return AUTH_ERROR_CODES.invalid_JWT;
 
     default:
-      return "UNKNOWN_ERROR";
+      return "Something went wrong. Please try again."; 
+
+    
   }
 }

@@ -5,7 +5,10 @@ export const AUTH_ERROR_CODES = {
   weak_password: "WEAK_PASSWORD",
   over_email_send_rate_limit: "RATE_LIMIT",
   over_request_rate_limit: "RATE_LIMIT",
-  session_not_found: "SESSION_NOT_FOUND",
+  session_not_found: "UNKNOWN_ERROR",
   signup_disabled: "SIGNUP_DISABLED",
   unexpected_failure: "SERVER_ERROR",
+  password_conflict: "PASSWORD_CONFLICT",
+  password_character_length: "PASSWORD_CHARACTER_LENGTH",
+  invalid_JWT: "INVALID_JWT",
 };

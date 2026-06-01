@@ -5,11 +5,13 @@ import { Box, Button, TextField, Typography, Paper, Divider } from '@mui/materia
 import { supabase } from '@/lib/supabaseClient';
 import { useRouter } from "next/navigation"
 import { getAuthErrorMessage } from '@/lib/auth/getErrorMsg';
+import { Eye, EyeOff } from "lucide-react";
 
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [message, setMessage] = useState('')
   const [loading, setLoading] = useState(false)
   const router = useRouter()
@@ -114,12 +116,25 @@ export default function SignupPage() {
           <TextField
             fullWidth
             label="Password"
-            type="password"
+            type={showPassword? "text":"password"}
             helperText="Minimum 8 characters"
             margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
+           <button
+              type="button"
+              onClick={() =>
+                setShowPassword(!showPassword)
+              }
+              className="absolute translate-y-9 right-[40%] text-gray-400"
+            >
+              {showPassword ? (
+                <Eye size={18} />
+              ) : (
+                <EyeOff size={18} />
+              )}
+            </button>
 
           <Button
             fullWidth

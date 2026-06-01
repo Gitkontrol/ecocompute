@@ -5,6 +5,7 @@ import { Loader2 } from 'lucide-react';
 import { PasswordInput } from '../RevealPassword';
 import { getAuthErrorMessage } from '@/lib/auth/getErrorMsg';
 import { useRouter } from 'next/navigation';
+import { useAuthModal } from '../context/AuthModalContext';
 
 export default function SignInForm({ onSuccess, variant = 'modal' }) {
   const [loading, setLoading] = useState(false);

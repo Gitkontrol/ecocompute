@@ -2,6 +2,7 @@ import { Geist, Geist_Mono, Roboto, Shadows_Into_Light } from "next/font/google"
 import "./globals.css";
 import { AuthModalProvider } from "../components/context/AuthModalContext";
 import AuthModalHost from "../components/AuthModalHost";
+import { AuthModalWatcher } from "@/components/auth/AuthModalWatcher";
 
 
 const geistSans = Geist({
@@ -40,9 +41,9 @@ export default function RootLayout({ children }) {
         className={`${geistSans.variable} ${geistMono.variable} ${roboto.variable} ${shadows.variable} antialiased pageColor`}
       >
         <AuthModalProvider>
-          <AuthModalHost /> 
+          <AuthModalHost />          
           {children}         
-          
+          <AuthModalWatcher /> 
         </AuthModalProvider>
          
         
