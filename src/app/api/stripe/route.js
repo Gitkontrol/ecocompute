@@ -3,6 +3,8 @@
 
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
+
 
 // Initialize Stripe with your secret key
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -13,31 +15,92 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2024-04-10"
 });
 
+const db = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
+
 export async function POST(request) {
   try {
-    const { priceId, email } = await request.json();
+    const body = await request.json();
 
-    // Create a checkout session
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      mode: 'subscription',
-      customer_email: email || undefined,
-      billing_address_collection: 'auto',
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        priceId,
-        toolName: toolName || '',
-        timeStamp: new Date().toISOString(),
-      },
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/cancel`,
+    console.log("Incoming body:", body);
+
+    const { priceId, userId, toolName } = body;
+    console.log(process.env.NEXT_PUBLIC_SITE_URL);
+    console.log("priceId:", priceId);
+
+    console.log({
+      priceId,
+      userId,
+      toolName,
     });
 
+    // rest of your logic...
+
+    const { data: user } = await db
+    .from("users")
+    .select("*")
+    .eq("id", userId)
+    .single();
+
+    if (!user) {
+    return NextResponse.json({ error: "User not found" }, { status: 404 });
+  }
+
+  let customerId = user.stripe_customer_id;
+
+  if (!customerId) {
+    const customer = await stripe.customers.create({
+      email: user.email,
+      metadata: {
+        userId: user.id,
+      },
+    });
+
+  customerId = customer.id;
+
+  const { error } = await db
+  .from("users")
+  .update({
+    stripe_customer_id: customerId,
+  })
+  .eq("id", user.id);
+
+  if (error) {
+    throw new Error(
+      `Failed to save Stripe customer ID: ${error.message}`
+    );
+  }
+}
+
+    // Create a checkout session
+    const origin = request.headers.get("origin") || process.env.NEXT_PUBLIC_SITE_URL;
+
+    const session = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    customer: customerId, // 🔥 THIS IS THE FIX
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+
+   success_url: `${origin}/payment_success?type=checkout&session_id={CHECKOUT_SESSION_ID}`,
+   cancel_url: `${origin}/cancel?type=checkout_cancelled`,
+
+    client_reference_id: user.id,
+
+    metadata: {
+      userId: user.id,
+      priceId,
+      toolName: toolName || "",
+    },
+  });
+  console.log("Checkout URL:", session.url);
+
+   
     return NextResponse.json({ url: session.url });
   } catch (error) {
     console.error('Stripe checkout error:', error);
@@ -45,20 +108,3 @@ export async function POST(request) {
   }
 }
 
-// --- Folder Structure Guide ---
-// Place this file under:
-//   /app/api/stripe/route.js
-// This aligns with Next.js 13+ API routing using the App Router.
-
-// --- How to Trigger Checkout ---
-// Example button logic in your pricing page:
-//
-// const handleSubscribe = async (priceId) => {
-//   const res = await fetch('/api/stripe', {
-//     method: 'POST',
-//     headers: { 'Content-Type': 'application/json' },
-//     body: JSON.stringify({ priceId, email: userEmail }),
-//   });
-//   const data = await res.json();
-//   if (data.url) window.location.href = data.url;
-// }

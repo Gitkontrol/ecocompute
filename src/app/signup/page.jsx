@@ -18,7 +18,7 @@ export default function SignupPage() {
   
 
   const handleSignup = async () => {
-  if (loading) return // prevent double submit
+  if (loading) return
 
   setLoading(true)
   setMessage('')
@@ -32,27 +32,34 @@ export default function SignupPage() {
       },
     })
 
-    
-    // 1️⃣ Handle Supabase errors cleanly
-    if (error) {      
-        setMessage(getAuthErrorMessage(error))
+    if (error) {
+      setMessage(getAuthErrorMessage(error))
+      return
+    }
+
+    if (data.user) {
+      const { error: profileError } = await supabase
+        .from('users')
+        .insert({
+          id: data.user.id,
+          email: data.user.email,
+        })
+
+      if (profileError) {
+        console.error('Profile creation failed:', profileError)
+        // Optional: decide whether this should block signup success.
       }
+    }
 
-      if (data?.session) {
-    router.push('/signup/success?type=verified')
-    return
-}
+    if (data?.session) {
+      router.push('/signup/success?type=verified')
+      return
+    }
 
-    // Email confirmation required
     router.push('/signup/success?type=confirm')
-
-
   } catch (err) {
-    // 4️⃣ Network / fetch errors
     console.error(err)
     setMessage('Oops! Something went wrong. Please try again.')
-
-    // Safety cleanup
     await supabase.auth.signOut()
   } finally {
     setLoading(false)

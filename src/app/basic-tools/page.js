@@ -1,6 +1,5 @@
 'use client';
 import { useState, useEffect } from 'react';
-import GlobalModal from '@/components/auth/GlobalAuth';
 import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
@@ -37,7 +36,7 @@ useEffect(() =>{
   return () => subscription.unsubscribe();
 }, [])
 
-const startCheckout = async ( priceId, toolName ) => {
+const startCheckout = async ( priceId, toolName, userId ) => {
   if (isLoading) return;
 
   setIsLoading(true);
@@ -46,15 +45,19 @@ const startCheckout = async ( priceId, toolName ) => {
     const res = await fetch('/api/stripe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priceId, toolName }),
+      body: JSON.stringify({ priceId, toolName, userId }),
     });
+    
 
     const data = await res.json();
+
+    console.log("Stripe response:", data);
+console.log("Status:", res.status);
 
     if (data.url) {
       window.location.href = data.url; // Redirect to Stripe Checkout
     } else {
-      console.error('No URL returned from Stripe');
+      console.error('No checkout URL returned');
       setIsLoading(false);
     }
   } catch (error) {
@@ -74,9 +77,9 @@ const startCheckout = async ( priceId, toolName ) => {
     {
       title: "Email Hosting",
       animationData: emailAnimation,
-      monthlyPrice: "$5",
+      monthlyPrice: "$150",
       description: "Professional email hosting with custom domains and advanced security.",
-      priceId: "price_1QWCloud123",
+      priceId: "price_1TfrdxRXPyJVoOx7z8b1Edbt",
       features: [
         "Custom domain email addresses",
         "25GB storage per mailbox", 
@@ -122,7 +125,7 @@ useEffect(() => {
   console.log('Page backgrounds:', { body: bodyBg, html: htmlBg });
 }, []);
 
-const paymentsEnabled = false;
+const paymentsEnabled = true;
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Header */}
@@ -206,19 +209,23 @@ const paymentsEnabled = false;
                       
                       <div className="flex space-x-4">
                         <button 
-                        disabled={!paymentsEnabled}
-                        // onClick={paymentsEnabled ? handleCheckout:null}
-                        onClick={() => { console.log("SUBSCRIBE CLICKED"); 
-                        requireAuth(() => {console.log("AUTH PASSED"); 
-                        startCheckout(priceId, toolName), {requireVerified: true}})}} 
-                        // disabled= {isLoading}
-                         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                          {/* {isLoading ? 'Redirecting...' : 'Subscribe to'} {tool.title} - {tool.monthlyPrice}/mo */}
-                          {paymentsEnabled ? 'Subscribe':'Coming soon'}
+                          disabled={!paymentsEnabled}
+                          // onClick={paymentsEnabled ? handleCheckout:null}
+                          onClick={() => {
+                            console.log("SUBSCRIBE CLICKED");
+
+                            requireAuth(async () => {
+                              console.log("AUTH PASSED");
+
+                              await startCheckout(tool.priceId, tool.title, user.id);
+                            }, { requireVerified: true });
+                          }} 
+                          // disabled= {isLoading}
+                          className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+                          {isLoading ? 'Redirecting...' : 'Subscribe'}
                         </button>
 
-                         {/* 🔐 Auth Modal */}
-                            <GlobalModal />
+                                                    
                              
                         <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           Learn More

@@ -4,11 +4,20 @@ import { useAuthModal } from "./context/AuthModalContext";
 import AuthModal from "./auth/AuthModal";
 
 export default function AuthModalHost() {
-  const { open, closeAuthModal } = useAuthModal();
+  const { open, modalType, payload, closeModal } = useAuthModal();
+
+  console.log("HOST OPEN:", open);
 
   if (!open) return null;
 
-  return <AuthModal onClose={closeAuthModal} />;
+  if (modalType === "auth") {
+    return (
+      <AuthModal
+        onClose={closeModal}
+        payload={payload}
+      />
+    );
+  }
+
+  return null;
 }
-
-

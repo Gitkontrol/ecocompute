@@ -6,12 +6,24 @@ const AuthModalContext = createContext();
 
 export function AuthModalProvider({ children }) {
   const [open, setOpen] = useState(false);
+  const [modalType, setModalType] = useState('auth');
+  const [payload, setPayload] = useState(null);
 
   // open modal
-  const openModal = () => setOpen(true);
+  const openModal = (type='auth', data=null) => {
+    console.log("OPEN MODAL CALLED");
+    setOpen(true);
+    setModalType(type);
+    setPayload(data);
+  };
 
   // close modal
-  const closeModal = () => setOpen(false);
+  const closeModal = () => {
+    setOpen(false);
+    setModalType('auth');
+    setPayload(null);
+
+  };
 
   return (
     <AuthModalContext.Provider
@@ -19,6 +31,8 @@ export function AuthModalProvider({ children }) {
         open,
         openModal,
         closeModal,
+        modalType,
+        payload,
       }}
     >
       {children}

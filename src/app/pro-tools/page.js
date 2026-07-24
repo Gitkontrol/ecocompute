@@ -12,7 +12,7 @@ import cloudStorageAnimation from '../../../public/animations/Cloud Computing.js
 import dataAnalyticsAnimation from '../../../public/animations/Analytics Character Animation.json';
 import securityAnimation from '../../../public/animations/Security Lock - Privacy.json';
 import { supabase } from '@/lib/supabaseClient';
-import GlobalModal from '@/components/auth/GlobalAuth';
+
 
 
 export default function ProTools() {
@@ -216,8 +216,8 @@ const startCheckout = async ( priceId, toolName ) => {
                           {/* {isLoading ? 'Redirecting...' : 'Subscribe to'}  {tool.title} - {tool.monthlyPrice}/mo */}
                           {paymentsEnabled ? 'Subscribe':'Coming soon'} 
                         </button>
-                         {/* 🔐 Auth Modal */}
-                            <GlobalModal />
+                         {/* 🔐 Auth Modal
+                            <GlobalModal /> */}
 
                         <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           Learn More
