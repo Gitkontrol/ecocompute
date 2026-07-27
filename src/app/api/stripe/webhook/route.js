@@ -111,11 +111,12 @@ export async function POST(req) {
       case "checkout.session.completed": {
         const session = event.data.object;
         const result = await syncStripeSubscription(session.subscription);
+        
 
         // Send welcome email using Resend
         if (result?.user) {
           await resend.emails.send({
-            from: "you@example.com",
+            from: "Ecocompute <noreply@ecocompute.tech>",
             to: result.user.email,
             subject: "Welcome to our service!",
             react: <Welcome userName={result.user.full_name} />
@@ -157,7 +158,7 @@ export async function POST(req) {
         // Send cancellation email      
       if (user) {
         await resend.emails.send({
-          from: "you@example.com",
+          from: "Ecocompute <noreply@ecocompute.tech>",
           to: user.email,
           subject: "Your subscription has been canceled",
           react: <Canceled userName={user.full_name} />
@@ -198,7 +199,7 @@ export async function POST(req) {
       
       if (failedUser) {
         await resend.emails.send({
-          from: "you@example.com",
+          from: "Ecocompute <noreply@ecocompute.tech>",
           to: failedUser.email,
           subject: "Payment failed",
           react: <Failed userName={failedUser.full_name} />
