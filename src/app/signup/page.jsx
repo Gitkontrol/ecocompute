@@ -134,7 +134,7 @@ export default function SignupPage() {
               onClick={() =>
                 setShowPassword(!showPassword)
               }
-              className="absolute translate-y-9 right-[40%] text-gray-400"
+              className="absolute translate-y-9 right-[42%] text-gray-400"
             >
               {showPassword ? (
                 <Eye size={18} />

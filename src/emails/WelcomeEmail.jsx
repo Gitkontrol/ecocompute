@@ -5,32 +5,31 @@ import { Button } from "@react-email/button";
 import { Section } from "@react-email/section";
 import { Img } from "@react-email/img";
 
-export function Welcome({ userName = "Valued User" }) {
+export function Welcome({
+  userName = "Valued User",
+  planName = "Pro Tools Package",
+  siteUrl = "https://ecocompute.tech",
+}) {
   return (
     <Html lang="en">
       <Section
-        style={{          
+        style={{
           padding: "40px 0",
           textAlign: "center",
           fontFamily: "Arial, sans-serif",
         }}
       >
-        {/* Top Logo */}
         <Img
-          src="/welcome.jpg"
+          src={`${siteUrl}/welcome.jpg`}
           alt="Welcome Logo"
           width="500"
           height="200"
           style={{ margin: "0 auto" }}
         />
 
-        {/* Main Card */}
         <Section
           style={{
-            
             padding: "30px",
-            
-            
             maxWidth: "600px",
             margin: "0 auto",
             textAlign: "center",
@@ -46,7 +45,7 @@ export function Welcome({ userName = "Valued User" }) {
               textAlign: "center",
             }}
           >
-            🎉 Welcome to Servana, {userName}!
+            Welcome to Ecocompute, {userName}!
           </Heading>
 
           <Text
@@ -57,13 +56,13 @@ export function Welcome({ userName = "Valued User" }) {
               lineHeight: "1.6",
             }}
           >
-            Your <strong>Pro Tools Package</strong> subscription has been
-            successfully activated. You now have access to premium tools and
-            features to power your workflow.
+            Your <strong>{planName}</strong> subscription has been successfully
+            activated. You now have access to premium tools and features to
+            power your workflow.
           </Text>
 
           <Button
-            href="https://servana.io/dashboard"
+            href={siteUrl}
             style={{
               backgroundColor: "#2563eb",
               color: "#fff",
@@ -84,14 +83,13 @@ export function Welcome({ userName = "Valued User" }) {
               marginTop: "25px",
             }}
           >
-            Thank you for choosing Servana. Let’s build something amazing together!
+            Thank you for choosing Ecocompute. Let's build something amazing
+            together!
           </Text>
         </Section>
 
-        {/* Bottom Left Logo */}
         <Section
           style={{
-            
             textAlign: "left",
             maxWidth: "600px",
             margin: "40px auto 0 auto",
@@ -104,20 +102,18 @@ export function Welcome({ userName = "Valued User" }) {
               color: "#6b7280",
               fontSize: "14px",
               marginLeft: "13px",
-              
             }}
           >
             The Eco Team
           </Text>
-          <div  style={{ marginTop: "-20px", }}>
+          <div style={{ marginTop: "-20px" }}>
             <Img
-              src="/ecologo.png"
+              src={`${siteUrl}/ecologo.png`}
               alt="Servana Logo"
               width="120"
-              height="auto"          
-              
+              height="auto"
             />
-          </div>  
+          </div>
         </Section>
       </Section>
     </Html>

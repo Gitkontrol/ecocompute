@@ -12,12 +12,12 @@ export default function Pricing() {
         
         <div className="grid md:grid-cols-3 gap-8">
           {/* Basic Plan */}
-          <div className="border border-gray-300 dark:border-gray-700 rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition">
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-8 bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition">
             <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Basic</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">Basic tools to get started</p>
              
-            <p className="text-6xl font-bold mb-6 text-gray-900 dark:text-gray-100">$19<span className="text-lg font-medium">/mo</span></p>
-            <div className="relative left-52 bottom-10 whitespace-nowrap text-wrap rounded-full h-24 w-24 transition dark:text-blue-100 dark:bg-blue-700 bg-blue-100 px-3 py-1 text-lg font-medium text-blue-700">
+            <p className="text-6xl font-bold mb-6 text-gray-900 dark:text-gray-100">$280<span className="text-lg font-medium">/Wk</span></p>
+            <div className="relative left-52 bottom-10 whitespace-nowrap text-wrap rounded-full h-24 w-24 transition dark:text-green-300 dark:bg-blue-700 bg-green-300 px-3 py-1 text-lg font-medium text-blue-700">
               <div className='absolute top-5 font-shadows font-bold'>Try FREE! for 3 days</div>
             </div>
             <ul className="absolute top-[450px] space-y-3">
@@ -27,7 +27,7 @@ export default function Pricing() {
             </ul>
             
             <Link href="/basic-tools">
-              <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition mt-12">
+              <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-md transition mt-12">
                 View Basic Tools
               </button>
             </Link>
@@ -36,12 +36,12 @@ export default function Pricing() {
           
 
           {/* Pro Plan */}
-          <div className="border border-gray-300 dark:border-gray-700 rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition">
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-8 bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition">
             <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Pro</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">Advanced tools for growing businesses</p>
-            <p className="text-6xl font-bold mb-6 text-gray-900 dark:text-gray-100">$49<span className="text-lg font-medium">/mo</span></p>
-             <div className="relative text-wrap left-52 bottom-10 z-10 transition whitespace-nowrap rounded-full h-24 w-24 dark:border-purple-300 dark:bg-blue-700 dark:text-purple-200 bg-purple-200 px-3 py-1 text-lg font-medium text-blue-700">
-              <div className='absolute top-5 font-shadows font-bold'>Try FREE! for 2 days </div>
+            <p className="text-6xl font-bold mb-6 text-gray-900 dark:text-gray-100">$330<span className="text-lg font-medium">/Wk</span></p>
+             <div className="relative text-wrap left-52 bottom-10 z-10 transition whitespace-nowrap rounded-full h-24 w-24 dark:border-purple-300 dark:bg-blue-700 dark:text-yellow-400 bg-yellow-400 px-3 py-1 text-lg font-medium text-blue-700">
+              <div className='absolute top-5 font-shadows font-bold'>Try FREE! for 3 days </div>
             </div>
             <ul className="absolute space-y-3 top-[450px]">
               <li className="flex items-center gap-2"><Cloud className="text-blue-500" /> Cloud Storage</li>
@@ -50,17 +50,17 @@ export default function Pricing() {
             </ul>
             
             <Link href="/pro-tools">
-            <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition mt-12">
+            <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-md transition mt-12">
               Subscribe Now
             </button>
             </Link>           
           </div>
 
           {/* Enterprise Plan */}
-          <div className="border border-gray-300 dark:border-gray-700 rounded-2xl p-8 bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition">
+          <div className="border border-gray-300 dark:border-gray-700 rounded-lg p-8 bg-white dark:bg-gray-800 shadow-md hover:shadow-xl transition">
             <h3 className="text-2xl font-semibold mb-4 text-gray-900 dark:text-gray-100">Enterprise</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">Comprehensive solutions for large teams</p>
-            <p className="text-6xl font-bold mb-6 text-gray-900 dark:text-gray-100">$99<span className="text-lg font-medium">/mo</span></p>
+            <p className="text-6xl font-bold mb-6 text-gray-900 dark:text-gray-100">$500<span className="text-lg font-medium">/Wk</span></p>
             <ul className="space-y-3 mb-6 pt-6">
               <li className="flex items-center gap-2"><Cloud className="text-blue-500" /> Cloud Integration</li>
               <li className="flex items-center gap-2"><Database className="text-blue-500" /> Business Intelligence</li>
@@ -68,7 +68,7 @@ export default function Pricing() {
             </ul>
 
             <Link href="/contact">
-            <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-lg transition">
+            <button className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold py-2 rounded-md transition">
               Contact Sales
             </button>
             </Link>

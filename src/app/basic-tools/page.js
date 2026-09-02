@@ -14,7 +14,20 @@ import emailAnimation from '../../../public/animations/email sent.json';
 import crmAnimation from '../../../public/animations/Omnichannel CRM.json';
 import dashBoardAnimation from '../../../public/animations/Dashboard - BI.json';
 
+function SubscribeButtonLabel({ isLoading }) {
+  if (!isLoading) return "Subscribe";
 
+  return (
+    <span className="inline-flex w-24 items-center justify-center">
+      <span>Loading</span>
+      <span aria-hidden="true" className="ml-1 inline-flex w-4 justify-between">
+        <span className="inline-block w-1 animate-bounce [animation-delay:0ms]">.</span>
+        <span className="inline-block w-1 animate-bounce [animation-delay:150ms]">.</span>
+        <span className="inline-block w-1 animate-bounce [animation-delay:300ms]">.</span>
+      </span>
+    </span>
+  );
+}
 
 export default function BasicTools() {
 const [user, setUser] = useState(null);
@@ -36,7 +49,10 @@ useEffect(() =>{
   return () => subscription.unsubscribe();
 }, [])
 
-const startCheckout = async ( priceId, toolName, userId ) => {
+
+
+
+const startCheckout = async ( priceId, serviceKey, userId ) => {
   if (isLoading) return;
 
   setIsLoading(true);
@@ -45,14 +61,22 @@ const startCheckout = async ( priceId, toolName, userId ) => {
     const res = await fetch('/api/stripe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ priceId, toolName, userId }),
+      body: JSON.stringify({ priceId, serviceKey, userId }),
     });
-    
+
 
     const data = await res.json();
 
+    if (res.status === 409) {
+      //show modal/message based on data.reason
+      console.log(data.reason, data.error);
+      setIsLoading(false);
+      return;
+    };
+
     console.log("Stripe response:", data);
-console.log("Status:", res.status);
+    console.log("Status:", res.status);
+
 
     if (data.url) {
       window.location.href = data.url; // Redirect to Stripe Checkout
@@ -66,7 +90,7 @@ console.log("Status:", res.status);
   }
  };
 
- 
+
   const [expandedSection, setExpandedSection] = useState(null);
   const { requireAuth } = useRequireAuth();
   const toggleSection = (index) => {
@@ -76,13 +100,15 @@ console.log("Status:", res.status);
   const tools = [
     {
       title: "Email Hosting",
+      serviceKey: "email_hosting",
       animationData: emailAnimation,
-      monthlyPrice: "$150",
+      monthlyPrice: "$100",
       description: "Professional email hosting with custom domains and advanced security.",
-      priceId: "price_1TfrdxRXPyJVoOx7z8b1Edbt",
+      priceId: "price_1U0Wf8RXPyJVoOx7Qh6TNGRc",
+      productId: "prod_V0XkwtXteCucsJ",
       features: [
         "Custom domain email addresses",
-        "25GB storage per mailbox", 
+        "25GB storage per mailbox",
         "Advanced spam filtering",
         "Mobile and desktop access",
         "Email forwarding and auto-replies"
@@ -90,24 +116,28 @@ console.log("Status:", res.status);
     },
     {
       title: "Project Tracker",
+      serviceKey: "project_tracker",
       animationData: dashBoardAnimation,
-      monthlyPrice: "$8",
+      monthlyPrice: "$115",
       description: "Comprehensive project management with real-time tracking and collaboration.",
-      priceId: "price_1QWCloud123",
+      priceId: "price_1TzT2kRXPyJVoOx7jaC96D3O",
+      productId: "prod_UzRwdC3iP2Ruwg",
       features: [
         "Kanban boards and Gantt charts",
         "Time tracking and reporting",
-        "Team collaboration tools", 
+        "Team collaboration tools",
         "File sharing and document management",
         "Integration with popular tools"
       ]
     },
     {
       title: "CRM Access",
+      serviceKey: "crm",
       animationData: crmAnimation,
-      monthlyPrice: "$6",
+      monthlyPrice: "$105",
       description: "Customer relationship management to track interactions and automate sales.",
-      priceId: "price_1QWCloud123",
+      priceId: "price_1U0WKwRXPyJVoOx7HfH7s5fx",
+      productId: "prod_V0XPD7OkkUoU3C",
       features: [
         "Contact and lead management",
         "Sales pipeline tracking",
@@ -115,8 +145,20 @@ console.log("Status:", res.status);
         "Customer support ticketing",
         "Analytics and reporting"
       ]
-    }
+    },
+
   ];
+
+  //Full Package object
+  const bundle = {
+    title: "Basic Package",
+    description: "Email Hosting + CRM + Project Management",
+    monthlyPrice: "$280",
+    productId: "prod_V0ZXNvdgHYyObs",
+    priceId: "price_1U0YOMRXPyJVoOx7ZXOEcnFn",
+    serviceKey: "basic_bundle",
+
+    };
 
   // Add to both page components
 useEffect(() => {
@@ -138,18 +180,18 @@ const paymentsEnabled = true;
             Basic Tools Package
           </h1>
           <p className="text-lg text-gray-600 dark:text-gray-300 mt-2">
-            $19/month - Individual tools also available
+            Save 25% on all tools with Basic Package
           </p>
         </div>
       </div>
-      
-     
-    
+
+
+
       {/* Tools Sections */}
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="space-y-6">
           {tools.map((tool, index) => (
-            <div 
+            <div
               key={index}
               className="bg-white dark:bg-gray-800 rounded-xl shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-lg"
             >
@@ -170,7 +212,7 @@ const paymentsEnabled = true;
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-2xl font-bold text-green-600 dark:text-green-400">
-                    {tool.monthlyPrice}/mo
+                    {tool.monthlyPrice}/Wk
                   </span>
                   <div className={`transform transition-transform ${expandedSection === index ? 'rotate-180' : ''}`}>
                     ▼
@@ -185,14 +227,14 @@ const paymentsEnabled = true;
                     {/* Lottie Animation */}
                     <div className="lg:w-2/5 flex justify-center items-end mt-2">
                       <div className="w-[250px] h-[250px]">
-                        <Lottie 
+                        <Lottie
                           animationData={tool.animationData}
                           loop={true}
                           autoplay={true}
                         />
                       </div>
                     </div>
-                    
+
                     {/* Content Section */}
                     <div className="lg:w-3/5">
                       <h4 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -206,10 +248,10 @@ const paymentsEnabled = true;
                           </li>
                         ))}
                       </ul>
-                      
+
                       <div className="flex space-x-4">
-                        <button 
-                          disabled={!paymentsEnabled}
+                        <button
+                          // disabled={!paymentsEnabled}
                           // onClick={paymentsEnabled ? handleCheckout:null}
                           onClick={() => {
                             console.log("SUBSCRIBE CLICKED");
@@ -217,16 +259,16 @@ const paymentsEnabled = true;
                             requireAuth(async () => {
                               console.log("AUTH PASSED");
 
-                              await startCheckout(tool.priceId, tool.title, user.id);
+                              await startCheckout(tool.priceId, tool.serviceKey, user.id);
                             }, { requireVerified: true });
-                          }} 
-                          // disabled= {isLoading}
-                          className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
-                          {isLoading ? 'Redirecting...' : 'Subscribe'}
+                          }}
+                          disabled={isLoading}
+                          className="min-w-[8.5rem] bg-blue-600 hover:bg-blue-500 disabled:bg-blue-400 text-white px-6 py-2 rounded-lg font-semibold transition-colors">
+                          <SubscribeButtonLabel isLoading={isLoading} />
                         </button>
 
-                                                    
-                             
+
+
                         <button className="border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 px-6 py-2 rounded-lg font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                           Learn More
                         </button>
@@ -242,21 +284,31 @@ const paymentsEnabled = true;
         {/* Full Package Subscription */}
         <div className="mt-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-2xl p-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
-            Get All Basic Tools - Save 30%
+            Get All Basic Tools - Save 25%
           </h2>
           <p className="text-blue-100 text-lg mb-2">
-            Individual tools: $19/month • Package: $19/month
+            Package: $280 weekly
           </p>
           <p className="text-blue-100 mb-6">
             Get all three tools together and save compared to purchasing individually
           </p>
-          <button 
-          disabled={!paymentsEnabled}
-          // onClick={() => handleCheckout(priceId) } 
-          // disabled={isLoading}
-          className="bg-white text-blue-600 hover:bg-blue-50 px-8 py-4 rounded-xl font-bold text-lg transition-colors shadow-lg">
+          <button
+          // disabled={!paymentsEnabled}
+          onClick={() => {
+            requireAuth(async ()=> {
+              const { data } = await supabase.auth.getUser();
+
+              if(!data.user) {
+                return;
+              }
+
+              await startCheckout(bundle.priceId, bundle.serviceKey, user.id);
+              }, {requireVerified: true });
+          }}
+          disabled={isLoading}
+          className="min-w-[10rem] bg-white text-blue-600 hover:bg-blue-50 disabled:bg-blue-100 disabled:text-blue-400 px-8 py-4 rounded-xl font-bold text-lg transition-colors shadow-lg">
             {/* Subscribe to Basic Package - $19/month */}
-            {paymentsEnabled ? 'Subscribe':'Coming soon'}
+            <SubscribeButtonLabel isLoading={isLoading} />
           </button>
         </div>
       </div>

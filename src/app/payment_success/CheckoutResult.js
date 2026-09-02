@@ -45,7 +45,7 @@ const content = {
 };
 
 export default function CheckoutResult({ status }) {
-  const result = content[status] || content[CHECKOUT_STATUS.FAILED];
+  const result = content[status] || content[STATUS.FAILED];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-6">
@@ -59,7 +59,7 @@ export default function CheckoutResult({ status }) {
         ):(        
         <Image
           src={result.image}
-          alt=""
+          alt="Cancel image"
           width={150}
           height={150}
           className="mx-auto mb-4"

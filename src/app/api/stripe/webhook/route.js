@@ -4,84 +4,113 @@ import { Resend } from "resend";
 import { Welcome } from "@/emails/WelcomeEmail";
 import { Failed } from "@/emails/FailedEmail";
 import { Canceled } from "@/emails/CanceledEmail";
+import { SERVICES } from "@/app/payment_success/Trials";
 import { createClient } from "@supabase/supabase-js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
-
-console.log("SUPABASE_URL:", process.env.SUPABASE_URL);
-console.log(
-  "SUPABASE_SERVICE_ROLE_KEY exists:",
-  !!process.env.SUPABASE_SERVICE_ROLE_KEY
-);
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ecocompute.tech";
+const emailFrom =
+  process.env.RESEND_FROM_EMAIL || "Ecocompute <noreply@ecocompute.tech>";
 
 const db = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-async function getUserByStripeCustomerId(db, customerId) {
-  const { data, error } = await db
-    .from("users")
-    .select("*")
-    .eq("stripe_customer_id", customerId)
-    .single();
-
-  if (error) return null;
-  return data;
-}
-
-function getSubscriptionPriceId(subscription) {
-  return subscription.items.data?.[0]?.price?.id || null;
-}
-
 function getStripeId(value) {
   return typeof value === "string" ? value : value?.id;
 }
 
-async function syncStripeSubscription(subscriptionId) {
-  const stripeSubscriptionId = getStripeId(subscriptionId);
-  if (!stripeSubscriptionId) return;
-
-  const subscription =
-    typeof subscriptionId === "string"
-      ? await stripe.subscriptions.retrieve(stripeSubscriptionId)
-      : subscriptionId;
-
-  const user = await getUserByStripeCustomerId(db, subscription.customer);
-  if (!user) {
-    console.log(
-      "No user found for Stripe customer:",
-      subscription.customer
-    );
-    return;
-  }
-
-  await upsertSubscription(db, {
-    user_id: user.id,
-    stripe_customer_id: subscription.customer,
-    stripe_subscription_id: subscription.id,
-    status: subscription.status,
-    price_id: getSubscriptionPriceId(subscription),
-    current_period_end: subscription.current_period_end,
-  });
-
-  return { user, subscription };
+function getPeriodDate(value) {
+  return value ? new Date(value * 1000) : null;
 }
 
-async function upsertSubscription(db, subscriptionData) {
-  const { data: upsertedSubscription, error } = await db
+async function getUserByStripeCustomerId(customerId) {
+  const { data, error } = await db
+    .from("users")
+    .select("*")
+    .eq("stripe_customer_id", customerId)
+    .maybeSingle();
+
+  if (error) {
+    console.error("User lookup failed:", error);
+    return null;
+  }
+
+  return data;
+}
+
+async function upsertSubscription(subscriptionData) {
+  const { data, error } = await db
     .from("subscriptions")
     .upsert(subscriptionData, {
       onConflict: "stripe_subscription_id",
     })
-    .select()
-    console.log("UPSERT RESULT:", upsertedSubscription)
+    .select();
 
   if (error) {
     console.error("UPSERT ERROR:", error);
     throw error;
   }
+
+  console.log("UPSERT RESULT:", data);
+  return data?.[0] || null;
+}
+
+async function subscriptionToRow(subscription) {
+  const item = subscription.items.data?.[0];
+
+  if (!item?.price) {
+    throw new Error(`Subscription ${subscription.id} has no price item`);
+  }
+
+  const productId = getStripeId(item.price.product);
+  const product = productId ? await stripe.products.retrieve(productId) : null;
+  const serviceKey = subscription.metadata?.serviceKey || null;
+
+  return {
+    stripe_customer_id: getStripeId(subscription.customer),
+    stripe_subscription_id: subscription.id,
+    status: subscription.status,
+    stripe_product_id: product?.id || productId,
+    product_name: product?.name || SERVICES[serviceKey]?.name || null,
+    price_id: item.price.id || null,
+    current_period_start: getPeriodDate(
+      item.current_period_start || subscription.current_period_start
+    ),
+    current_period_end: getPeriodDate(
+      item.current_period_end || subscription.current_period_end
+    ),
+    service_key: serviceKey,
+    plan_type: subscription.metadata?.planType || SERVICES[serviceKey]?.type || null,
+  };
+}
+
+async function syncStripeSubscription(subscriptionOrId) {
+  const stripeSubscriptionId = getStripeId(subscriptionOrId);
+  if (!stripeSubscriptionId) return null;
+
+  const subscription =
+    typeof subscriptionOrId === "string"
+      ? await stripe.subscriptions.retrieve(stripeSubscriptionId)
+      : subscriptionOrId;
+
+  const customerId = getStripeId(subscription.customer);
+  const user = await getUserByStripeCustomerId(customerId);
+
+  if (!user) {
+    console.log("No user found for Stripe customer:", customerId);
+    return null;
+  }
+
+  const row = await subscriptionToRow(subscription);
+  await upsertSubscription({
+    ...row,
+    user_id: user.id,
+  });
+
+  return { user, subscription, row };
 }
 
 export async function POST(req) {
@@ -104,85 +133,63 @@ export async function POST(req) {
 
   try {
     switch (event.type) {
-
-      // =========================
-      // CHECKOUT COMPLETED
-      // =========================
       case "checkout.session.completed": {
         const session = event.data.object;
         const result = await syncStripeSubscription(session.subscription);
-        
 
-        // Send welcome email using Resend
-        if (result?.user) {
-          await resend.emails.send({
-            from: "Ecocompute <noreply@ecocompute.tech>",
+        if (result?.user?.email) {
+          const serviceName =
+            SERVICES[result.row.service_key]?.name || result.row.product_name || "Subscription";
+          const { data, error } = await resend.emails.send({
+            from: emailFrom,
             to: result.user.email,
-            subject: "Welcome to our service!",
-            react: <Welcome userName={result.user.full_name} />
+            subject: "Welcome to Servana",
+            react: (
+              <Welcome
+                userName={result.user.full_name}
+                planName={serviceName}
+                siteUrl={siteUrl}
+              />
+            ),
+          });
+
+          console.log("RESEND DATA:", data);
+          console.log("RESEND ERROR:", error);
+        }
+
+        break;
+      }
+
+      case "customer.subscription.created":
+      case "customer.subscription.updated": {
+        await syncStripeSubscription(event.data.object);
+        break;
+      }
+
+      case "customer.subscription.deleted": {
+        const sub = event.data.object;
+        const result = await syncStripeSubscription(sub);
+
+        if (result?.user?.email) {
+          await resend.emails.send({
+            from: emailFrom,
+            to: result.user.email,
+            subject: "Your subscription has been canceled",
+            react: <Canceled userName={result.user.full_name} />,
           });
         }
 
         break;
       }
 
-      // =========================
-      // SUB CREATED / UPDATED (SOURCE OF TRUTH)
-      // =========================
-      case "customer.subscription.created":
-      case "customer.subscription.updated": {
-        const sub = event.data.object;
-        await syncStripeSubscription(sub);
-
-        break;
-      }
-
-      // =========================
-      // SUB DELETED
-      // =========================
-      case "customer.subscription.deleted": {
-        const sub = event.data.object;
-
-        const user = await getUserByStripeCustomerId(db, sub.customer);
-        if (!user) break;
-
-        await upsertSubscription(db, {
-          user_id: user.id,
-          stripe_customer_id: sub.customer,
-          stripe_subscription_id: sub.id,
-          status: "canceled",
-          price_id: sub.items.data?.[0]?.price?.id || null,
-          current_period_end: sub.current_period_end,
-        });
-
-        // Send cancellation email      
-      if (user) {
-        await resend.emails.send({
-          from: "Ecocompute <noreply@ecocompute.tech>",
-          to: user.email,
-          subject: "Your subscription has been canceled",
-          react: <Canceled userName={user.full_name} />
-        });
-      }
-
-        break;
-      }
-
-      // =========================
-      // INVOICE PAID
-      // =========================
       case "invoice.paid":
       case "invoice.payment_succeeded": {
-        const invoice = event.data.object;
-        await syncStripeSubscription(invoice.subscription);
-
+        await syncStripeSubscription(event.data.object.subscription);
         break;
       }
 
-      // Stripe newer API versions can emit InvoicePayment events separately.
       case "invoice_payment.paid": {
-        const invoicePayment = event.data.object;
-        const invoiceId = getStripeId(invoicePayment.invoice);
+        const invoiceId = getStripeId(event.data.object.invoice);
 
         if (invoiceId) {
           const invoice = await stripe.invoices.retrieve(invoiceId);
@@ -193,23 +200,25 @@ export async function POST(req) {
       }
 
       case "invoice.payment_failed": {
-      const failedInvoice = event.data.object;
-      const failedUser = await getUserByStripeCustomerId(db, failedInvoice.customer);
-      await syncStripeSubscription(failedInvoice.subscription);
-      
-      if (failedUser) {
-        await resend.emails.send({
-          from: "Ecocompute <noreply@ecocompute.tech>",
-          to: failedUser.email,
-          subject: "Payment failed",
-          react: <Failed userName={failedUser.full_name} />
-        });
-      }
-      break;
-    }  
+        const failedInvoice = event.data.object;
+        const failedUser = await getUserByStripeCustomerId(
+          getStripeId(failedInvoice.customer)
+        );
 
-      // Customer creation is expected during Checkout setup. The customer ID
-      // is saved in /api/stripe when the Checkout Session is created.
+        await syncStripeSubscription(failedInvoice.subscription);
+
+        if (failedUser?.email) {
+          await resend.emails.send({
+            from: emailFrom,
+            to: failedUser.email,
+            subject: "Payment failed",
+            react: <Failed userName={failedUser.full_name} />,
+          });
+        }
+
+        break;
+      }
+
       case "customer.created":
       case "checkout.session.expired":
         break;

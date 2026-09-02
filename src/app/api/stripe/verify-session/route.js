@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createClient } from "@supabase/supabase-js";
-import { STATUS } from "@/app/payment_success/CheckoutStatus"
+import { STATUS } from "@/app/payment_success/CheckoutStatus";
+import { SERVICES } from "@/app/payment_success/Trials";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -9,6 +10,59 @@ const supabaseAdmin = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
+
+function getStripeId(value) {
+  return typeof value === "string" ? value : value?.id;
+}
+
+function getPeriodDate(value) {
+  return value ? new Date(value * 1000) : null;
+}
+
+async function upsertVerifiedSubscription({ userId, customerId, subscription }) {
+  const item = subscription.items.data?.[0];
+
+  if (!item?.price) {
+    throw new Error(`Subscription ${subscription.id} has no price item`);
+  }
+
+  const serviceKey = subscription.metadata?.serviceKey || null;
+  const productId = getStripeId(item.price.product);
+  const product = productId ? await stripe.products.retrieve(productId) : null;
+
+  const { data, error } = await supabaseAdmin
+    .from("subscriptions")
+    .upsert(
+      {
+        user_id: userId,
+        stripe_customer_id: customerId,
+        stripe_subscription_id: subscription.id,
+        status: subscription.status,
+        stripe_product_id: product?.id || productId,
+        product_name: product?.name || SERVICES[serviceKey]?.name || null,
+        price_id: item.price.id || null,
+        current_period_start: getPeriodDate(
+          item.current_period_start || subscription.current_period_start
+        ),
+        current_period_end: getPeriodDate(
+          item.current_period_end || subscription.current_period_end
+        ),
+        service_key: serviceKey,
+        plan_type: subscription.metadata?.planType || SERVICES[serviceKey]?.type || null,
+      },
+      {
+        onConflict: "stripe_subscription_id",
+      }
+    )
+    .select()
+    .single();
+
+  if (error) {
+    throw error;
+  }
+
+  return data;
+}
 
 export async function GET(request) {
   try {
@@ -18,11 +72,10 @@ export async function GET(request) {
     if (!sessionId) {
       return NextResponse.json({
         status: STATUS.MISSING,
-        message: "Missing session_id", 
+        message: "Missing session_id",
       });
     }
 
-    // 1. Stripe Checkout Session
     const checkoutSession = await stripe.checkout.sessions.retrieve(sessionId, {
       expand: ["subscription"],
     });
@@ -39,7 +92,7 @@ export async function GET(request) {
     }
 
     const userId = checkoutSession.client_reference_id;
-    const stripeCustomerId = checkoutSession.customer;
+    const stripeCustomerId = getStripeId(checkoutSession.customer);
     const subscription =
       typeof checkoutSession.subscription === "string"
         ? await stripe.subscriptions.retrieve(checkoutSession.subscription)
@@ -52,7 +105,6 @@ export async function GET(request) {
       });
     }
 
-    // 2. Stripe Subscription
     const validSubscriptionStatuses = ["active", "trialing"];
 
     if (!validSubscriptionStatuses.includes(subscription.status)) {
@@ -62,7 +114,6 @@ export async function GET(request) {
       });
     }
 
-    // 3. Supabase subscriptions table
     const { data: dbSubscription, error: dbError } = await supabaseAdmin
       .from("subscriptions")
       .select("*")
@@ -74,35 +125,38 @@ export async function GET(request) {
     if (dbError) {
       console.error("Supabase subscription lookup failed:", dbError);
 
-      return NextResponse.json({
-        status: STATUS.FAILED,
-        message: "Database lookup failed",
-        
-      },
-       { status: 500 } 
-    );
-  }
-
-    if (!dbSubscription) {
-      return NextResponse.json({
-        status: STATUS.CHECKING,
-        message: "waiting for webhook to finish.",
-      });
+      return NextResponse.json(
+        {
+          status: STATUS.FAILED,
+          message: "Database lookup failed",
+        },
+        { status: 500 }
+      );
     }
 
-    // 4. Return success
+    const verifiedSubscription =
+      dbSubscription ||
+      (await upsertVerifiedSubscription({
+        userId,
+        customerId: stripeCustomerId,
+        subscription,
+      }));
+
     return NextResponse.json({
-      status: STATUS.SUCCESS,      
+      status: STATUS.SUCCESS,
       userId,
       customerId: stripeCustomerId,
       subscriptionId: subscription.id,
       subscriptionStatus: subscription.status,
+      serviceKey: verifiedSubscription.service_key,
+      planType: verifiedSubscription.plan_type,
     });
   } catch (error) {
     console.error("Verify session error:", error);
 
-    return NextResponse.json({
-        status: STATUS.CANCELLED,
+    return NextResponse.json(
+      {
+        status: STATUS.FAILED,
         message: "Unable to verify checkout session",
       },
       { status: 500 }
