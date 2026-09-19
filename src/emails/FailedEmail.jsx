@@ -67,3 +67,5 @@ export function Failed({ userName, planName }) {
     </Html>
   );
 }
+
+export default Failed

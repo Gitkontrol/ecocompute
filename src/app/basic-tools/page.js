@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useRequireAuth } from '../hooks/requireAuth';
+import ReasonModal from '@/components/auth/ReasonModal';
 
 
 // Dynamically import Lottie to avoid SSR issues
@@ -13,6 +14,7 @@ const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
 import emailAnimation from '../../../public/animations/email sent.json';
 import crmAnimation from '../../../public/animations/Omnichannel CRM.json';
 import dashBoardAnimation from '../../../public/animations/Dashboard - BI.json';
+import AuthModal from '@/components/auth/AuthModal';
 
 function SubscribeButtonLabel({ isLoading }) {
   if (!isLoading) return "Subscribe";
@@ -32,6 +34,9 @@ function SubscribeButtonLabel({ isLoading }) {
 export default function BasicTools() {
 const [user, setUser] = useState(null);
 const [isLoading, setIsLoading] = useState(false);
+const [purchaseReason, setPurchaseReason] = useState(null);
+
+console.log("purchaseReason state: ", purchaseReason)
 
 
 useEffect(() =>{
@@ -50,8 +55,6 @@ useEffect(() =>{
 }, [])
 
 
-
-
 const startCheckout = async ( priceId, serviceKey, userId ) => {
   if (isLoading) return;
 
@@ -64,30 +67,41 @@ const startCheckout = async ( priceId, serviceKey, userId ) => {
       body: JSON.stringify({ priceId, serviceKey, userId }),
     });
 
-
     const data = await res.json();
+    console.log("CHECKOUT RESPONSE:", {
+    status: res.status,
+    data,
+  });
 
-    if (res.status === 409) {
-      //show modal/message based on data.reason
-      console.log(data.reason, data.error);
-      setIsLoading(false);
+    //subscription rule rejection
+    if (res.status === 409) {      
+    console.log("409 REASON:", data.reason);
+    console.log("409 ERROR:", data.error);
+
+      setPurchaseReason(data.reason);
       return;
     };
 
     console.log("Stripe response:", data);
     console.log("Status:", res.status);
 
-
-    if (data.url) {
-      window.location.href = data.url; // Redirect to Stripe Checkout
-    } else {
-      console.error('No checkout URL returned');
-      setIsLoading(false);
+    //Actual server error
+    if(!res.ok){
+      throw new Error(data.error || "Failed to start checkout");
     }
+
+    //Successful stripe checkout creation
+    if (!data.url) {
+      throw new Error("No checkout URL returned")
+    }
+
+    window.location.href = data.url; // Redirect to Stripe Checkout
+
   } catch (error) {
-    console.error('Subscription error:', error);
+    console.error('Subscription error:', error);    
+  } finally {
     setIsLoading(false);
-  }
+  }  
  };
 
 
@@ -167,7 +181,7 @@ useEffect(() => {
   console.log('Page backgrounds:', { body: bodyBg, html: htmlBg });
 }, []);
 
-const paymentsEnabled = true;
+// const paymentsEnabled = true;
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
       {/* Header */}
@@ -219,7 +233,7 @@ const paymentsEnabled = true;
                   </div>
                 </div>
               </button>
-
+              
               {/* Expandable Content - WITH ANIMATIONS */}
               {expandedSection === index && (
                 <div className="px-6 pb-6 border-t border-gray-200 dark:border-gray-700 pt-6">
@@ -249,6 +263,7 @@ const paymentsEnabled = true;
                         ))}
                       </ul>
 
+                      
                       <div className="flex space-x-4">
                         <button
                           // disabled={!paymentsEnabled}
@@ -279,6 +294,10 @@ const paymentsEnabled = true;
               )}
             </div>
           ))}
+          <ReasonModal
+            reason={purchaseReason}
+            onClose={() => setPurchaseReason(null)}    
+          />
         </div>
 
         {/* Full Package Subscription */}

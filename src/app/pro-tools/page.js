@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabaseClient';
 import dynamic from 'next/dynamic';
 import { useRequireAuth } from '../hooks/requireAuth';
+import ReasonModal from '@/components/auth/ReasonModal';
 
 // Dynamically import Lottie to avoid SSR issues
 const Lottie = dynamic(() => import('lottie-react'), { ssr: false });
@@ -32,6 +33,7 @@ function SubscribeButtonLabel({ isLoading }) {
 export default function ProTools() {
 const [user, setUser] = useState(null);
 const [isLoading, setIsLoading] = useState(false);
+const [purchaseReason, setPurchaseReason] = useState(null)
 
 useEffect(() =>{
   const getUser = async ()=>{
@@ -62,23 +64,33 @@ const startCheckout = async ( priceId, serviceKey, userId ) => {
 
     const data = await res.json();
 
-    if (res.status === 409) {
-      //show modal/message based on data.reason
+    //subscription rule rejection
+    if (res.status === 409) {      
       console.log(data.reason, data.error);
-      setIsLoading(false);
+      setPurchaseReason(data.reason);
       return;
     };
 
-    if (data.url) {
-      window.location.href = data.url; // Redirect to Stripe Checkout
-    } else {
-      console.error('No URL returned from Stripe');
-      setIsLoading(false);
+    console.log("Stripe response:", data);
+    console.log("Status:", res.status);
+
+    //Actual server error
+    if(!res.ok){
+      throw new Error(data.error || "Failed to start checkout");
     }
-  } catch (error) {
-    console.error('Subscription error:', error);
-    setIsLoading(false);
-  }
+
+    //Successful stripe checkout creation
+    if (!data.url) {
+      throw new Error("No checkout URL returned")
+    }
+
+    window.location.href = data.url; // Redirect to Stripe Checkout
+
+    } catch (error) {
+      console.error('Subscription error:', error);    
+    } finally {
+      setIsLoading(false);
+    }  
  };
 
 
@@ -250,6 +262,10 @@ const startCheckout = async ( priceId, serviceKey, userId ) => {
               )}
             </div>
           ))}
+          <ReasonModal
+            reason={purchaseReason}
+            onClose={() => setPurchaseReason(null)}    
+          />
         </div>
 
         {/* Full Package Subscription */}

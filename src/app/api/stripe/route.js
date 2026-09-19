@@ -4,7 +4,9 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
-import { SERVICES, ACTIVE_SUBSCRIPTION_STATUSES } from '@/app/payment_success/Trials'
+import { SERVICES, ACTIVE_SUBSCRIPTION_STATUSES } from '@/app/payment_success/Trials';
+import { PURCHASE_REASONS } from '@/components/auth/PurchaseReasons';
+
 
 
 // Initialize Stripe with your secret key
@@ -54,7 +56,7 @@ function canPurchase(service, subscriptions) {
   if (hasBundle && service.type === "individual") {
     return {
       allowed: false,
-      reason: "already_in_bundle",
+      reason: PURCHASE_REASONS.ALREADY_IN_BUNDLE,
       message: "This service is already included in your Business bundle.",
     };
   }
@@ -65,7 +67,7 @@ function canPurchase(service, subscriptions) {
   ) {
     return {
       allowed: false,
-      reason: "already_subscribed",
+      reason: PURCHASE_REASONS.ALREADY_SUBSCRIBED,
       message: "You already have an active subscription for this service.",
     };
   }
@@ -75,7 +77,7 @@ function canPurchase(service, subscriptions) {
   ) {
     return {
       allowed: false,
-      reason: "bundle_required",
+      reason: PURCHASE_REASONS.BUNDLE_REQUIRED,
       message: "You already have multiple individual subscriptions. Please choose the bundle instead",
     };
   }
@@ -85,7 +87,7 @@ function canPurchase(service, subscriptions) {
   ) {
     return {
       allowed: false,
-      reason: "cancel_individuals_first",
+      reason: PURCHASE_REASONS.CANCEL_INDIVIDUALS_FIRST,
       message: "Your individual subscriptions must fully end before you can buy this bundle."
     };
   }

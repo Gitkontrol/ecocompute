@@ -7,12 +7,14 @@ import { getAuthErrorMessage } from '@/lib/auth/getErrorMsg';
 import { useRouter } from 'next/navigation';
 import { useAuthModal } from '../context/AuthModalContext';
 
+
 export default function SignInForm({ onSuccess, variant = 'modal' }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [password, setPassword] = useState('');
   const version = variant;
   const router = useRouter();
+  const { closeModal } = useAuthModal();
 
   
   // const router = useRouter();
@@ -42,6 +44,7 @@ export default function SignInForm({ onSuccess, variant = 'modal' }) {
     }
   }
 
+ 
 
    const inputStyles = variant === "modal"
     ? "dark:bg-gray-800 border-gray-600 dark:border-gray-600 text-white dark:text-white"
@@ -91,8 +94,11 @@ return (
       </button> */}
       <button
         type="button"
-        onClick={() => router.push("/forgot-password")}
-        className="flex w-full justify-end relative bottom-3 text-xs text-primary  hover:text-red-700 text-gray-500 font-sans"
+        onClick={() =>{
+          closeModal(); 
+          router.push("/forgot-password");
+        }}               
+        className="flex w-full justify-end relative bottom-3 text-xs text-primary hover:text-red-700 text-gray-500 font-sans"
       >
         Forgot Password?
       </button>

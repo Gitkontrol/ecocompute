@@ -1,6 +1,12 @@
 import { Html, Head, Preview, Body, Container, Text, Button, Section } from "@react-email/components";
+import { Img } from "@react-email/img"
 
-export function Canceled({ userName, planName }) {
+export function Canceled({ 
+  userName, 
+  planName,
+  siteUrl = "https://ecocompute.tech", 
+
+}) {
   return (
     <Html>
       <Head />
@@ -8,12 +14,15 @@ export function Canceled({ userName, planName }) {
       <Body style={{ backgroundColor: "#f9fafb", fontFamily: "Arial, sans-serif" }}>
         <Container style={{ backgroundColor: "#ffffff", padding: "24px", borderRadius: "12px", maxWidth: "600px", margin: "40px auto" }}>
           <Section style={{ textAlign: "center" }}>
-            <img
-              src="/cancelled.jpg"
-              alt="Cancelled"
-              height={300}
-              width={300}
-              style={{ margin: "0 auto"}}
+            <Img
+              src={`${siteUrl}/cancelled.jpg`}
+              alt="Logo"
+              width="200"
+              height="40"
+              style={{ 
+                margin: "0 auto",
+                paddingRight: "10px",
+              }}
             />
             <Text style={{ fontSize: "20px", fontWeight: "bold", color: "#111827" }}>
               We're sorry to see you go!
@@ -60,3 +69,5 @@ export function Canceled({ userName, planName }) {
     </Html>
   );
 }
+
+export default Canceled

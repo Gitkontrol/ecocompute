@@ -1,13 +1,13 @@
 import { Html } from "@react-email/html";
 import { Heading } from "@react-email/heading";
-import { Text } from "@react-email/text";
 import { Button } from "@react-email/button";
+import { Text } from "react-email";
 import { Section } from "@react-email/section";
 import { Img } from "@react-email/img";
 
 export function Welcome({
   userName = "Valued User",
-  planName = "Pro Tools Package",
+  planName,
   siteUrl = "https://ecocompute.tech",
 }) {
   return (
@@ -20,18 +20,28 @@ export function Welcome({
         }}
       >
         <Img
+          src={`${siteUrl}/logo.png`}
+          alt="Logo"
+          width="200"
+          height="40"
+          style={{ 
+            margin: "0 auto",
+            paddingRight: "10px",
+          }}
+        />
+
+         <Img
           src={`${siteUrl}/welcome.jpg`}
           alt="Welcome Logo"
           width="500"
-          height="200"
+          height="300"
           style={{ margin: "0 auto" }}
         />
 
         <Section
           style={{
-            padding: "30px",
-            maxWidth: "600px",
-            margin: "0 auto",
+            marginTop: "-50px",
+            maxWidth: "600px",            
             textAlign: "center",
           }}
         >
@@ -101,21 +111,40 @@ export function Welcome({
             style={{
               color: "#6b7280",
               fontSize: "14px",
-              marginLeft: "13px",
+              paddingLeft: "166px",
+              marginTop: "-30px",
+              width: "100px",
             }}
           >
             The Eco Team
           </Text>
-          <div style={{ marginTop: "-20px" }}>
-            <Img
-              src={`${siteUrl}/ecologo.png`}
-              alt="Servana Logo"
-              width="120"
-              height="auto"
-            />
-          </div>
+        </Section>
+
+        <Section
+          style={{            
+            borderTop: "1px solid #e5e7eb",
+            paddingTop: "25px",
+            marginTop: "30px",
+            textAlign: "center",
+            width: "50%",
+          }}
+        >
+          <Text
+            style={{
+              color: "#9ca3af",
+              fontSize: "12px",
+              lineHeight: 1.8,
+              margin: 0,              
+            }}
+          >
+            © 2026 Ecocompute. All rights reserved.
+            <br />
+            Secure tools and services built for modern teams.
+          </Text>
         </Section>
       </Section>
     </Html>
   );
 }
+
+export default Welcome

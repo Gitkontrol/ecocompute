@@ -10,8 +10,9 @@ import { createClient } from "@supabase/supabase-js";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 const resend = new Resend(process.env.RESEND_API_KEY);
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://ecocompute.tech";
-const emailFrom =
-  process.env.RESEND_FROM_EMAIL || "Ecocompute <noreply@ecocompute.tech>";
+const emailFrom = process.env.RESEND_FROM_EMAIL || "noreply@ecocompute.tech";
+
+
 
 const db = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL,
@@ -143,7 +144,7 @@ export async function POST(req) {
           const { data, error } = await resend.emails.send({
             from: emailFrom,
             to: result.user.email,
-            subject: "Welcome to Servana",
+            subject: "Welcome to Ecocompute",
             react: (
               <Welcome
                 userName={result.user.full_name}
@@ -153,8 +154,12 @@ export async function POST(req) {
             ),
           });
 
-          console.log("RESEND DATA:", data);
-          console.log("RESEND ERROR:", error);
+          if (error) {
+            console.error("RESEND FAILED:", JSON.stringify(error));
+            // optionally: don't throw, so Stripe doesn't retry the whole webhook
+          } else {
+            console.log("RESEND SENT:", data?.id);
+          }
         }
 
         break;
