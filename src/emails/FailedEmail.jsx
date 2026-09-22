@@ -1,4 +1,5 @@
 import { Html, Head, Preview, Body, Container, Text, Button, Section } from "@react-email/components";
+import { Img } from "@react-email/img"
 
 export function Failed({ userName, planName }) {
   return (
@@ -17,7 +18,7 @@ export function Failed({ userName, planName }) {
           }}
         >
           <Section style={{ textAlign: "center" }}>          
-            <img
+            <Img
               src="/Failed-Payment.svg"
               alt="Failed Payment"
               width={300}
@@ -28,9 +29,11 @@ export function Failed({ userName, planName }) {
               }}  
             />
             
-            <Text style={{ fontSize: "20px", fontWeight: "bold", color: "#b91c1c" }}>
-              ⚠️ Payment Failed — Action Needed
+            <Text style={{ fontSize: "20px", fontWeight: "bold", color: "#b91c1c", lineHeight: "24px" }}>
+              <span style={{ fontSize: "17px", verticalAlign: "bottom", lineHeight: "27px" }}>⚠️</span>{" "} 
+              Payment Failed — Action Needed
             </Text>
+            
           </Section>
 
           <Text style={{ fontSize: "16px", color: "#374151", marginTop: "12px" }}>

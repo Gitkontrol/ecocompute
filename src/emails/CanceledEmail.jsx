@@ -17,24 +17,33 @@ export function Canceled({
             <Img
               src={`${siteUrl}/logo.png`}
               alt="Logo"
-              width="150"
+              width="200"
               height="auto"
               style={{ 
                 margin: "0 auto",
-                paddingRight: "10px",
+                paddingRight: "20px",
+                paddingBottom: "50px",
+
               }}
             />
             <Img
               src={`${siteUrl}/canceled.png`}
               alt="Logo"
-              width="200"
-              height="40"
+              width="auto"
+              height="250"
               style={{ 
                 margin: "0 auto",
-                paddingRight: "10px",
+                padding: "10px",
               }}
             />
-            <Text style={{ fontSize: "20px", fontWeight: "bold", color: "#111827", fontFamily: '"Comic Sans MS", cursive, sans-serif' }}>
+            <Text style={{ 
+              fontSize: "20px", 
+              fontWeight: "bold", 
+              color: "#111827", 
+              fontFamily: '"Comic Sans MS", cursive, sans-serif',
+              paddingRight: "20px" 
+
+            }}>
               We're sorry to see you go!
             </Text>
           </Section>
