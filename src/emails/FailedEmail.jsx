@@ -1,7 +1,14 @@
 import { Html, Head, Preview, Body, Container, Text, Button, Section } from "@react-email/components";
 import { Img } from "@react-email/img"
 
-export function Failed({ userName, planName }) {
+
+
+export function Failed({ 
+  userName, 
+  planName,
+  siteUrl = "https://ecocompute.tech" 
+
+}) {
   return (
     <Html>
       <Head />
@@ -17,9 +24,20 @@ export function Failed({ userName, planName }) {
             margin: "40px auto",
           }}
         >
-          <Section style={{ textAlign: "center" }}>          
+          <Section style={{ textAlign: "center" }}>
             <Img
-              src="/Failed-Payment.svg"
+              src={`${siteUrl}/logo.png`}
+              alt="Logo"
+              width="200"
+              height="40"
+              style={{ 
+                margin: "0 auto",                
+                paddingBottom: "40px",
+                paddingLeft: "5px",
+              }}
+            />          
+            <Img
+              src={`${siteUrl}/Failed-Payment.svg`}
               alt="Failed Payment"
               width={300}
               height={300}
@@ -29,7 +47,7 @@ export function Failed({ userName, planName }) {
               }}  
             />
             
-            <Text style={{ fontSize: "20px", fontWeight: "bold", color: "#b91c1c", lineHeight: "24px" }}>
+            <Text style={{ fontSize: "20px", fontWeight: "bold", color: "#b91c1c", lineHeight: "24px", marginTop: "-10px" }}>
               <span style={{ fontSize: "17px", verticalAlign: "bottom", lineHeight: "27px" }}>⚠️</span>{" "} 
               Payment Failed — Action Needed
             </Text>
@@ -62,9 +80,32 @@ export function Failed({ userName, planName }) {
             </Button>
           </Section>
 
-          <Text style={{ fontSize: "14px", color: "#6b7280", marginTop: "20px" }}>
+          <Text style={{ fontSize: "14px", color: "#6b7280", marginTop: "20px", marginBottom: "50px" }}>
             If you recently updated your payment details, you can ignore this email.
           </Text>
+
+          <Section
+            style={{            
+              borderTop: "1px solid #e5e7eb",
+              paddingTop: "25px",
+              marginTop: "30px",
+              textAlign: "center",
+              width: "100%",
+            }}
+          >
+          <Text
+            style={{
+              color: "#9ca3af",
+              fontSize: "12px",
+              lineHeight: 1.8,
+              margin: 0,              
+            }}
+          >
+            © 2026 Ecocompute. All rights reserved.
+            <br />
+            Secure tools and services built for modern teams.
+          </Text>
+        </Section>
         </Container>
       </Body>
     </Html>
