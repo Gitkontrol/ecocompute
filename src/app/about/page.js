@@ -5,9 +5,9 @@ export default function About() {
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 py-16 px-6">
       <div className="max-w-5xl mx-auto text-center">
         <Info className="w-12 h-12 mx-auto text-blue-500 mb-6" />
-        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">About Servana</h1>
+        <h1 className="text-4xl font-bold mb-4 text-gray-900 dark:text-gray-100">About Eco-compute</h1>
         <p className="text-lg text-gray-600 dark:text-gray-400 mb-10">
-          Servana is an innovative SaaS platform providing essential IT and business solutions to help
+          Ecocompute is an innovative SaaS platform providing essential IT and business solutions to help
           organizations thrive in a digital-first world. From CRM systems to cloud and cybersecurity
           tools, we’re committed to empowering growth with technology that’s both scalable and secure.
         </p>

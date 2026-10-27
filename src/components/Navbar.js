@@ -77,10 +77,24 @@ const Navbar = () => {
           </Link>
           <span className="h-5 w-px bg-gray-500 dark:bg-white/50" />
 
-          <Link href="/contact" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+          <Link href="/privacy" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+           Privacy
+          </Link>
+          <span className="h-5 w-px bg-gray-500 dark:bg-white/50" />
+
+           <Link href="/terms" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            Terms
+          </Link>
+          <span className="h-5 w-px bg-gray-500 dark:bg-white/50" />
+
+           <Link href="/refunds" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+            Help
+          </Link>
+          <span className="h-5 w-px bg-gray-500 dark:bg-white/50" />
+
+           <Link href="/contact" className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
             Contact
           </Link>
-
           <span className="h-5 w-px bg-gray-500 dark:bg-white/50" />
           
           

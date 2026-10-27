@@ -172,16 +172,22 @@ export default function SuccessClient() {
         ) : (
           <>
             <Typography variant="h5" fontWeight={600} gutterBottom>
-              Check your email
-              
-              <img 
-              src='/delivered.png' 
-              alt='delivered' 
-              height={120} 
-              width={120}
-              className='relative left-32'
-            />
+              Check your email            
             </Typography>
+
+            <Box
+              component='img'
+              src='/delivered.png' 
+              alt='delivered'                 
+              sx={{
+                display: 'block', 
+                margin: '0 auto',
+                width: '120px',
+                height: 'auto',
+                marginRight: '150',
+                my: 2,                 
+              }}           
+            />
 
             <Typography variant="body2" color="text.secondary" sx={{ mb: 0 }}>
               We’ve sent a confirmation link to{' '}
@@ -206,8 +212,7 @@ export default function SuccessClient() {
           </Typography>
 
             {/* 🔁 Resend */}
-            <Button       
-              
+            <Button              
               sx={{ mt: 3 }}
               onClick={handleResend}
               disabled={resendLoading || cooldown > 0}
